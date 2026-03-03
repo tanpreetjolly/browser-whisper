@@ -1,0 +1,44 @@
+{
+  "name": "browserwhisper",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Browser-native audio transcription with WebCodecs and Whisper",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "dev": "bun --bun vite",
+    "build": "bun run typecheck && bun --bun vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "bun --bun vite preview"
+  },
+  "keywords": [
+    "whisper",
+    "transcription",
+    "webcodecs",
+    "speech-to-text",
+    "browser"
+  ],
+  "sideEffects": false,
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
+    "mediabunny": "^1.35.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.3.1"
+  }
+}
