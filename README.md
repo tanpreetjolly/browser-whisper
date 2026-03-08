@@ -2,14 +2,17 @@
 
 > Browser-native audio transcription powered by WebCodecs + Whisper
 
-`browser-whisper` is a zero-dependency\* TypeScript library that transcribes
-audio and video files entirely inside the browser — no server required.
+`browser-whisper` is a lightweight, hardware-accelerated library that transcribes
+audio and video files entirely inside the browser using WebCodecs and WebGPU. 
+No backend. No Python. No cloud API keys.
 
-It uses:
-- **[MediaBunny](https://github.com/nicholasgasior/mediabunny)** — fast WASM demuxer to unpack audio from any container (MP3, MP4, WebM, WAV …)
-- **WebCodecs AudioDecoder** — GPU-accelerated decoding
-- **[transformers.js](https://huggingface.co/docs/transformers.js)** — Whisper inference in WebGPU or WASM
-- **Hybrid Quantization** — 4-bit decoder makes models 60% smaller with negligible accuracy loss
+It acts as a clean, unified bridge over two underlying libraries:
+- `@huggingface/transformers` for WebGPU neural network inference
+- `mediabunny` for native WebCodecs audio extraction and decoding
+
+By automatically orchestrating Web Workers, maintaining inference queues, and 
+handling memory-safe decoding, `browser-whisper` lets you drop OpenAI's Whisper 
+model into any frontend application in just three lines of code.
 
 ---
 

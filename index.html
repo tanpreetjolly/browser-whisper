@@ -9,208 +9,234 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #09090b;
-      --surface: rgba(24, 24, 27, 0.7);
-      --surface-hover: rgba(39, 39, 42, 0.9);
-      --border: rgba(255, 255, 255, 0.1);
-      --accent: #3b82f6;
-      --accent-hover: #2563eb;
-      --text: #fafafa;
-      --text-muted: #a1a1aa;
-      --radius: 16px;
+      /* Rose Pine Moon inspired palette */
+      --base: #232136;
+      --surface: #2a273f;
+      --overlay: #393552;
+      --muted: #6e6a86;
+      --subtle: #908caa;
+      --text: #e0def4;
+      --love: #eb6f92;
+      --gold: #f6c177;
+      --rose: #ea9a97;
+      --pine: #3e8fb0;
+      --foam: #9ccfd8;
+      --iris: #c4a7e7;
+      --highlight: rgba(234, 154, 151, 0.15);
     }
 
     body {
-      background-color: var(--bg);
+      background-color: var(--base);
       color: var(--text);
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       margin: 0;
+      padding: 2rem;
       min-height: 100vh;
       display: flex;
-      align-items: center;
       justify-content: center;
-      background-image:
-        radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.12), transparent 25%),
-        radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.12), transparent 25%);
+      align-items: flex-start;
+      padding-top: 10vh;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
 
     .container {
-      max-width: 800px;
-      padding: 4rem 2rem;
-      text-align: center;
+      width: 100%;
+      max-width: 720px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      gap: 2rem;
+      gap: 2.5rem;
     }
 
-    .badge {
-      background: rgba(59, 130, 246, 0.1);
-      color: #60a5fa;
-      padding: 0.5rem 1rem;
-      border-radius: 9999px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      border: 1px solid rgba(59, 130, 246, 0.2);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
 
     h1 {
-      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-size: 1.5rem;
       font-weight: 700;
       margin: 0;
-      letter-spacing: -0.05em;
-      line-height: 1.1;
-      background: linear-gradient(to right, #ffffff, #a1a1aa);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--rose);
+      letter-spacing: -0.02em;
     }
 
-    p.subtitle {
-      font-size: 1.1rem;
-      color: var(--text-muted);
-      max-width: 600px;
-      line-height: 1.6;
+    .version {
+      color: var(--gold);
+      font-size: 0.85rem;
+      background: var(--surface);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .description {
+      color: var(--subtle);
+      font-size: 0.95rem;
       margin: 0;
+      max-width: 600px;
     }
 
-    /* Terminal Window */
-    .terminal {
-      background: #000;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1rem;
-      width: 100%;
-      max-width: 500px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(10px);
+    /* Command Line Block */
+    .cmd-panel {
+      background: var(--surface);
+      border: 1px solid var(--overlay);
+      border-radius: 6px;
+      padding: 1.5rem;
+      position: relative;
     }
 
-    .terminal-header {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-    }
-
-    .dot.r {
-      background: #ef4444;
-    }
-
-    .dot.y {
-      background: #eab308;
-    }
-
-    .dot.g {
-      background: #22c55e;
-    }
-
-    .tabs {
+    .cmd-header {
       display: flex;
       gap: 1rem;
       margin-bottom: 1rem;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 0.5rem;
+      border-bottom: 1px dashed var(--overlay);
+      padding-bottom: 0.75rem;
     }
 
-    .tab {
-      color: var(--text-muted);
+    .pkg-manager {
+      color: var(--muted);
       font-size: 0.85rem;
       cursor: pointer;
-      font-weight: 500;
-      transition: color 0.2s;
+      background: transparent;
+      border: none;
+      padding: 0;
+      font-family: inherit;
     }
 
-    .tab:hover,
-    .tab.active {
+    .pkg-manager:hover {
       color: var(--text);
     }
 
-    .code-block {
+    .pkg-manager.active {
+      color: var(--foam);
+      font-weight: bold;
+    }
+
+    .cmd-line {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
     }
 
-    .code-block code {
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 0.9rem;
-      color: #e2e8f0;
+    .cmd-text {
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .cmd-text::before {
+      content: "$ ";
+      color: var(--love);
     }
 
     .copy-btn {
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: var(--overlay);
       color: var(--text);
-      border-radius: 6px;
-      padding: 0.4rem 0.6rem;
+      border: none;
+      padding: 0.4rem 0.8rem;
       font-size: 0.75rem;
-      font-weight: 500;
+      border-radius: 4px;
       cursor: pointer;
-      transition: all 0.2s;
+      font-family: inherit;
+      transition: all 0.2s ease;
     }
 
     .copy-btn:hover {
-      background: var(--surface-hover);
+      background: var(--muted);
     }
 
-    /* Action Buttons */
-    .actions {
+    /* Snippet Panel */
+    .snippet-panel {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--overlay);
+      border-radius: 6px;
+      padding: 1.5rem;
+      text-align: left;
+      margin-top: 1.5rem;
+      position: relative;
+    }
+
+    .snippet-panel::before {
+      content: "quick_start.ts";
+      position: absolute;
+      top: -10px;
+      left: 1rem;
+      background: var(--base);
+      padding: 0 0.5rem;
+      font-size: 0.8rem;
+      color: var(--pine);
+      font-weight: 600;
+    }
+
+    .code-block {
+      margin: 0;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--text);
+      white-space: pre;
+      overflow-x: auto;
+    }
+
+    /* Basic Syntax Highlighting */
+    .k {
+      color: var(--pine);
+    }
+
+    /* keyword */
+    .s {
+      color: var(--gold);
+    }
+
+    /* string */
+    .f {
+      color: var(--rose);
+    }
+
+    /* function */
+    .c {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* comment */
+    .n {
+      color: var(--text);
+    }
+
+    /* normal */
+
+    /* Navigation Links */
+    .nav-links {
       display: flex;
-      gap: 1rem;
-      margin-top: 1rem;
+      gap: 1.5rem;
+      font-size: 0.95rem;
     }
 
-    .btn {
+    .nav-links a {
+      color: var(--pine);
+      text-decoration: none;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      padding: 0.875rem 1.75rem;
-      border-radius: 9999px;
-      font-size: 1rem;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s;
-      cursor: pointer;
-      border: 1px solid transparent;
+      gap: 0.5rem;
+      transition: color 0.15s;
     }
 
-    .btn-primary {
-      background: var(--text);
-      color: var(--bg);
+    .nav-links a:hover {
+      color: var(--foam);
+      text-decoration: underline;
+      text-underline-offset: 4px;
     }
 
-    .btn-primary:hover {
-      background: #e4e4e7;
-      transform: translateY(-2px);
-    }
-
-    .btn-secondary {
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .btn-secondary:hover {
-      background: var(--surface-hover);
-      border-color: rgba(255, 255, 255, 0.2);
-      transform: translateY(-2px);
-    }
-
-    .icon {
-      width: 20px;
-      height: 20px;
-      margin-right: 8px;
-      fill: currentColor;
+    .nav-links a::before {
+      content: "->";
+      color: var(--muted);
+      font-size: 0.85rem;
     }
   </style>
 </head>
@@ -218,53 +244,52 @@
 <body>
 
   <div class="container">
-    <div class="badge">v0.1.0 Available Now</div>
+    <header>
+      <div class="title-row">
+        <h1>browser-whisper</h1>
+        <span class="version">v0.1.0</span>
+      </div>
+      <p class="description">
+        Native WebGPU audio transcription. Connects directly to WebCodecs and Transformers.js for zero-server inference.
+      </p>
+    </header>
 
-    <h1>browser-whisper</h1>
-    <p class="subtitle">
-      Zero-dependency, hardware-accelerated audio transcription directly in the browser. Powered by WebCodecs, WebGPU,
-      and Transformers.js. No server required.
-    </p>
+    <main>
+      <div class="cmd-panel">
+        <div class="cmd-header">
+          <button class="pkg-manager active" data-cmd="bun add browser-whisper">bun</button>
+          <button class="pkg-manager" data-cmd="npm install browser-whisper">npm</button>
+          <button class="pkg-manager" data-cmd="pnpm add browser-whisper">pnpm</button>
+          <button class="pkg-manager" data-cmd="yarn add browser-whisper">yarn</button>
+        </div>
 
-    <div class="terminal">
-      <div class="terminal-header">
-        <div class="dot r"></div>
-        <div class="dot y"></div>
-        <div class="dot g"></div>
+        <div class="cmd-line">
+          <span class="cmd-text" id="cmdCode">bun add browser-whisper</span>
+          <button class="copy-btn" id="copyBtn">copy</button>
+        </div>
       </div>
 
-      <div class="tabs">
-        <div class="tab active" data-cmd="bun add browser-whisper">Bun</div>
-        <div class="tab" data-cmd="npm install browser-whisper">npm</div>
-        <div class="tab" data-cmd="pnpm add browser-whisper">pnpm</div>
-        <div class="tab" data-cmd="yarn add browser-whisper">Yarn</div>
-      </div>
+      <div class="snippet-panel">
+        <pre class="code-block"><span class="k">import</span> { <span class="n">BrowserWhisper</span> } <span class="k">from</span> <span class="s">'browser-whisper'</span>;
 
-      <div class="code-block">
-        <code id="cmdCode">bun add browser-whisper</code>
-        <button class="copy-btn" id="copyBtn">Copy</button>
-      </div>
-    </div>
+<span class="c">// 1. Initialize the library</span>
+<span class="k">const</span> <span class="n">whisper</span> = <span class="k">new</span> <span class="f">BrowserWhisper</span>({ model: <span class="s">'whisper-base'</span> });
 
-    <div class="actions">
-      <a href="/demo/" class="btn btn-primary">
-        <svg class="icon" viewBox="0 0 24 24">
-          <path d="M8 5v14l11-7z" />
-        </svg>
-        Launch Demo
-      </a>
-      <a href="https://github.com/tanpreetsinghjolly/browser-whisper" class="btn btn-secondary">
-        <svg class="icon" viewBox="0 0 24 24">
-          <path
-            d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.379.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
-        </svg>
-        GitHub
-      </a>
-    </div>
+<span class="c">// 2. Transcribe an audio/video file</span>
+<span class="k">for await</span> (<span class="k">const</span> { <span class="n">text</span>, <span class="n">start</span>, <span class="n">end</span> } <span class="k">of</span> <span class="n">whisper</span>.<span class="f">transcribe</span>(<span class="n">file</span>)) {
+    <span class="n">console</span>.<span class="f">log</span>(<span class="s">`[${start}-${end}s]: ${text}`</span>);
+}</pre>
+      </div>
+    </main>
+
+    <nav class="nav-links">
+      <a href="/demo/">Live Demo</a>
+      <a href="https://github.com/tanpreetsinghjolly/browser-whisper">GitHub Repository</a>
+    </nav>
   </div>
 
   <script>
-    const tabs = document.querySelectorAll('.tab');
+    const tabs = document.querySelectorAll('.pkg-manager');
     const codeEl = document.getElementById('cmdCode');
     const copyBtn = document.getElementById('copyBtn');
 
@@ -279,16 +304,12 @@
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(codeEl.textContent);
       const originalText = copyBtn.textContent;
-      copyBtn.textContent = 'Copied!';
-      copyBtn.style.background = '#22c55e';
-      copyBtn.style.color = '#fff';
-      copyBtn.style.borderColor = '#22c55e';
+      copyBtn.textContent = 'copied';
+      copyBtn.style.color = 'var(--foam)';
 
       setTimeout(() => {
         copyBtn.textContent = originalText;
-        copyBtn.style.background = '';
-        copyBtn.style.color = '';
-        copyBtn.style.borderColor = '';
+        copyBtn.style.color = 'var(--text)';
       }, 2000);
     });
   </script>

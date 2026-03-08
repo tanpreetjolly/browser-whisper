@@ -8,60 +8,92 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #09090b;
-      --surface: #18181b;
-      --border: #27272a;
-      --text: #f4f4f5;
-      --text-muted: #a1a1aa;
-      --accent: #3b82f6;
+      --base: #232136;
+      --surface: #2a273f;
+      --overlay: #393552;
+      --muted: #6e6a86;
+      --subtle: #908caa;
+      --text: #e0def4;
+      --love: #eb6f92;
+      --gold: #f6c177;
+      --rose: #ea9a97;
+      --pine: #3e8fb0;
+      --foam: #9ccfd8;
+      --iris: #c4a7e7;
     }
 
     body {
-      font-family: 'Inter', -apple-system, sans-serif;
-      background: var(--bg);
+      font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: var(--base);
       color: var(--text);
       margin: 0;
       padding: 2rem;
+      padding-top: 10vh;
       display: flex;
       justify-content: center;
+      align-items: flex-start;
+      -webkit-font-smoothing: antialiased;
     }
 
     .container {
       width: 100%;
-      max-width: 900px;
+      max-width: 720px;
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
+      gap: 2.5rem;
     }
 
-    .header {
+    header {
       display: flex;
       justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .title-row {
+      display: flex;
       align-items: center;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 1rem;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
     }
 
     h1 {
       margin: 0;
       font-size: 1.5rem;
-      font-weight: 600;
+      font-weight: 700;
+      color: var(--rose);
+      letter-spacing: -0.02em;
+    }
+
+    .version {
+      color: var(--gold);
+      font-size: 0.85rem;
+      background: var(--surface);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
     }
 
     a.back {
-      color: var(--text-muted);
+      color: var(--pine);
       text-decoration: none;
       font-size: 0.9rem;
+      transition: color 0.15s;
     }
 
     a.back:hover {
-      color: var(--text);
+      color: var(--foam);
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
+    a.back::before {
+      content: "<- ";
+      color: var(--muted);
     }
 
     .card {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      border: 1px solid var(--overlay);
+      border-radius: 4px;
       padding: 1.5rem;
       display: flex;
       flex-direction: column;
@@ -75,29 +107,62 @@
       flex-wrap: wrap;
     }
 
-    select,
-    button,
-    input[type="file"] {
-      background: var(--bg);
+    select {
+      background: var(--base);
       color: var(--text);
-      border: 1px solid var(--border);
+      border: 1px solid var(--overlay);
       padding: 0.5rem 1rem;
-      border-radius: 6px;
+      border-radius: 4px;
       font-family: inherit;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    /* Custom File Input Styling */
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-input-label {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px dashed var(--muted);
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .file-input-label:hover {
+      border-color: var(--foam);
+      color: var(--foam);
+    }
+
+    .file-input-label::before {
+      content: "[ choose file ]";
+      margin-right: 0.5rem;
+      color: var(--pine);
+    }
+
+    select:focus {
+      border-color: var(--iris);
     }
 
     button {
-      background: var(--text);
-      color: var(--bg);
-      font-weight: 600;
+      background: var(--pine);
+      color: var(--base);
+      font-weight: 700;
       cursor: pointer;
       border: none;
-      transition: background 0.15s;
+      transition: all 0.15s;
     }
 
     button:hover:not(:disabled) {
-      background: #e4e4e7;
+      background: var(--foam);
     }
 
     button:disabled {
@@ -106,29 +171,40 @@
     }
 
     .status {
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       font-size: 0.85rem;
-      color: var(--accent);
+      color: var(--subtle);
+      padding: 0.5rem;
+      background: var(--base);
+      border: 1px solid var(--overlay);
+      border-radius: 4px;
+    }
+
+    .status::before {
+      content: "> ";
+      color: var(--gold);
     }
 
     .media-container {
       display: none;
       width: 100%;
+      border: 1px solid var(--overlay);
+      border-radius: 4px;
+      overflow: hidden;
+      background: #000;
     }
 
     video,
     audio {
       width: 100%;
-      border-radius: 8px;
       outline: none;
-      background: #000;
+      display: block;
       max-height: 400px;
     }
 
     .transcript {
       max-height: 300px;
       overflow-y: auto;
-      border: 1px solid var(--border);
+      border: 1px solid var(--overlay);
       background: var(--surface);
       padding: 1rem;
       border-radius: 6px;
@@ -166,7 +242,7 @@
     .json-output {
       max-height: 400px;
       overflow-y: auto;
-      border: 1px solid var(--border);
+      border: 1px solid var(--overlay);
       background: #000;
       padding: 1rem;
       border-radius: 6px;
@@ -195,58 +271,68 @@
       font-size: 0.75rem;
       background: var(--surface);
       color: var(--text);
-      border: 1px solid var(--border);
+      border: 1px solid var(--overlay);
     }
   </style>
 </head>
 
 <body>
   <div class="container">
-    <div class="header">
-      <h1>browser-whisper Demo</h1>
-      <a href="/" class="back">← Back to Home</a>
-    </div>
-
-    <div class="card">
-      <div class="controls">
-        <input type="file" id="fileInput" accept="audio/*,video/*" />
-        <select id="modelSelect">
-          <option value="whisper-tiny">Tiny (~30 MB)</option>
-          <option value="whisper-base" selected>Base (~55 MB)</option>
-          <option value="whisper-small">Small (~175 MB)</option>
-        </select>
-        <button id="transcribeBtn" disabled>Test Transcription</button>
+    <header>
+      <div>
+        <div class="title-row">
+          <h1>browser-whisper</h1>
+          <span class="version">demo</span>
+        </div>
+        <a href="/" class="back">Back to pkg</a>
       </div>
-      <div class="status" id="statusLog">Ready for input. Select a file to begin.</div>
-    </div>
+    </header>
 
-    <div class="media-container" id="mediaContainer">
-      <!-- Native audio/video player injected here -->
-    </div>
-
-    <div id="transcriptSection" style="display:none">
-      <div class="section-header">Playback Sync</div>
-      <div class="transcript" id="transcriptBox"></div>
-    </div>
-
-    <div id="jsonSection" style="display:none">
-      <div class="section-header">
-        Raw JSON Output (Developer View)
-        <button class="copy-btn" id="copyBtn">Copy JSON</button>
+    <main style="display: flex; flex-direction: column; gap: 1.5rem;">
+      <div class="card">
+        <div class="controls">
+          <label class="file-input-label" id="fileLabel">
+            <input type="file" id="fileInput" accept="audio/*,video/*" />
+            <span id="fileName">No file selected</span>
+          </label>
+          <select id="modelSelect">
+            <option value="whisper-tiny">Tiny (~30 MB)</option>
+            <option value="whisper-base" selected>Base (~55 MB)</option>
+            <option value="whisper-small">Small (~175 MB)</option>
+          </select>
+          <button id="transcribeBtn" disabled>Test Transcription</button>
+        </div>
+        <div class="status" id="statusLog">Ready for input. Select a file to begin.</div>
       </div>
-      <pre class="json-output" id="jsonBox"></pre>
-    </div>
+
+      <div class="media-container" id="mediaContainer">
+        <!-- Native audio/video player injected here -->
+      </div>
+
+      <div id="transcriptSection" style="display:none">
+        <div class="section-header">Playback Sync</div>
+        <div class="transcript" id="transcriptBox"></div>
+      </div>
+
+      <div id="jsonSection" style="display:none">
+        <div class="section-header">
+          Raw JSON Output (Developer View)
+          <button class="copy-btn" id="copyBtn">copy json</button>
+        </div>
+        <pre class="json-output" id="jsonBox"></pre>
+      </div>
+    </main>
   </div>
 
   <script type="module">
     import { BrowserWhisper } from '/src/index.ts';
 
     const $ = id => document.getElementById(id);
-    const fileInput = $('fileInput'), modelSelect = $('modelSelect'),
-      transcribeBtn = $('transcribeBtn'), statusLog = $('statusLog'),
-      mediaContainer = $('mediaContainer'), transcriptBox = $('transcriptBox'),
-      transcriptSection = $('transcriptSection'), jsonSection = $('jsonSection'),
-      jsonBox = $('jsonBox'), copyBtn = $('copyBtn');
+    const fileInput = $('fileInput'), fileLabel = $('fileLabel'), fileName = $('fileName'),
+      modelSelect = $('modelSelect'), transcribeBtn = $('transcribeBtn'),
+      statusLog = $('statusLog'), mediaContainer = $('mediaContainer'),
+      transcriptBox = $('transcriptBox'), transcriptSection = $('transcriptSection'),
+      jsonSection = $('jsonSection'), jsonBox = $('jsonBox'), copyBtn = $('copyBtn');
 
     let file = null;
     let mediaEl = null;
@@ -258,7 +344,15 @@
 
     fileInput.addEventListener('change', () => {
       file = fileInput.files?.[0] || null;
-      if (file) transcribeBtn.disabled = false;
+      if (file) {
+        fileName.textContent = file.name;
+        fileLabel.style.borderColor = 'var(--foam)';
+        transcribeBtn.disabled = false;
+      } else {
+        fileName.textContent = 'No file selected';
+        fileLabel.style.borderColor = 'var(--muted)';
+        transcribeBtn.disabled = true;
+      }
     });
 
     transcribeBtn.addEventListener('click', async () => {
