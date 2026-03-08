@@ -83,6 +83,20 @@
       max-width: 600px;
     }
 
+    .description a {
+      color: var(--pine);
+      text-decoration: underline dashed var(--muted);
+      text-underline-offset: 4px;
+      transition: all 0.15s;
+      position: relative;
+      z-index: 10;
+    }
+
+    .description a:hover {
+      color: var(--foam);
+      text-decoration: underline solid var(--foam);
+    }
+
     /* Command Line Block */
     .cmd-panel {
       background: var(--surface);
@@ -250,7 +264,11 @@
         <span class="version">v0.1.0</span>
       </div>
       <p class="description">
-        Native WebGPU audio transcription. Connects directly to WebCodecs and Transformers.js for zero-server inference.
+        Native <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API" target="_blank">WebGPU</a> audio
+        transcription. Connects directly to <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebCodecs_API"
+          target="_blank">WebCodecs</a> (<a href="https://mediabunny.dev" target="_blank">mediabunny</a>) and <a
+          href="https://huggingface.co/docs/transformers.js" target="_blank">Transformers.js</a> for zero-server
+        inference.
       </p>
     </header>
 
