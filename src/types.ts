@@ -8,7 +8,7 @@ export type WhisperModel =
     | 'whisper-small'
     | 'whisper-large';
 
-/** Map a friendly model name to the Hugging Face model ID */
+/** Map a friendly model name to its Hugging Face Hub model ID */
 export const MODEL_IDS: Record<WhisperModel, string> = {
     'whisper-tiny': 'onnx-community/whisper-tiny',
     'whisper-base': 'onnx-community/whisper-base',
@@ -20,6 +20,15 @@ export const MODEL_IDS: Record<WhisperModel, string> = {
 // Public API types
 // ---------------------------------------------------------------------------
 
+/** A single word with its precise timestamp */
+export interface WordTimestamp {
+    text: string;
+    /** Start time in seconds, relative to the beginning of the file */
+    start: number;
+    /** End time in seconds, relative to the beginning of the file */
+    end: number;
+}
+
 /** A single transcribed segment with text and file-relative timestamps */
 export interface TranscriptSegment {
     text: string;
@@ -27,6 +36,18 @@ export interface TranscriptSegment {
     start: number;
     /** End time in seconds, relative to the beginning of the file */
     end: number;
+    /** Per-word timestamps (available when using word-level timestamps) */
+    words?: WordTimestamp[];
+}
+
+/**
+ * Progress event emitted during transcription.
+ * Named `TranscribeProgress` to avoid collision with the browser's ProgressEvent.
+ */
+export interface TranscribeProgress {
+    stage: 'loading' | 'decoding' | 'transcribing' | 'done';
+    /** 0–1 completion fraction */
+    progress: number;
 }
 
 /** Options passed to `Transcriber.transcribe()` */
@@ -37,28 +58,21 @@ export interface TranscribeOptions {
     language?: string;
     /** Called for each segment as it is transcribed */
     onSegment?: (segment: TranscriptSegment) => void;
-    /** Called with progress updates */
-    onProgress?: (event: ProgressEvent) => void;
-}
-
-/** A progress event from any pipeline stage */
-export interface ProgressEvent {
-    stage: 'loading' | 'decoding' | 'transcribing' | 'done';
-    /** 0–1 fraction */
-    progress: number;
+    /** Called with progress updates during decoding and transcription */
+    onProgress?: (event: TranscribeProgress) => void;
 }
 
 // ---------------------------------------------------------------------------
-// Internal PCM transfer type
+// Internal PCM transfer type (decoder → whisper worker via MessageChannel)
 // ---------------------------------------------------------------------------
 
-/** A chunk of mono 16-kHz PCM samples passed from decoder to whisper worker */
+/** A chunk of mono 16-kHz PCM samples transferred between workers */
 export interface PCMChunk {
     /** Mono Float32 samples at 16 kHz */
     samples: Float32Array;
     /** Start time of this chunk in seconds, relative to the file beginning */
     timestamp: number;
-    /** True when this is the last chunk */
+    /** True when this is the last chunk in the stream */
     final: boolean;
 }
 
@@ -71,15 +85,15 @@ export type DecoderMessage =
     | { type: 'init'; file: File }
     | { type: 'port'; port: MessagePort };
 
-// — Messages sent TO the whisper worker —
+// — Messages sent TO the whisper worker (via self.postMessage) —
 export type WhisperMessage =
     | { type: 'init'; modelId: string; language?: string }
     | { type: 'port'; port: MessagePort };
 
-// — Messages sent FROM workers back TO the main thread —
+// — Messages sent FROM workers TO the main thread —
 export type MainThreadMessage =
     | { type: 'segment'; segment: TranscriptSegment }
-    | { type: 'progress'; event: ProgressEvent }
+    | { type: 'progress'; event: TranscribeProgress }
     | { type: 'ready' }
     | { type: 'done' }
     | { type: 'error'; message: string };

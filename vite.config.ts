@@ -14,15 +14,15 @@ export default defineConfig({
       // Build the two workers as separate ES chunks
       input: {
         index: resolve(__dirname, 'src/index.ts'),
-        'decoder.worker': resolve(__dirname, 'src/workers/decoder.worker.ts'),
-        'whisper.worker': resolve(__dirname, 'src/workers/whisper.worker.ts'),
+        'decoder-worker': resolve(__dirname, 'src/workers/decoder-worker.ts'),
+        'whisper-worker': resolve(__dirname, 'src/workers/whisper-worker.ts'),
       },
       output: {
         // Keep worker filenames predictable so Bridge can import them
         entryFileNames: '[name].js',
         chunkFileNames: 'chunks/[name]-[hash].js',
       },
-      // Peer deps — consumers must install these themselves
+      // Externalize dependencies so they aren't bundled (NPM handles installing them)
       external: ['@huggingface/transformers', 'mediabunny'],
     },
   },

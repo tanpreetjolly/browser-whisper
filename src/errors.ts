@@ -1,4 +1,4 @@
-/** Base error class for all browserwhisper errors */
+/** Base error class for all browser-whisper errors */
 export class BrowserWhisperError extends Error {
     constructor(message: string) {
         super(message);

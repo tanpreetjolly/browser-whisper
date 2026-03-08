@@ -1,25 +1,24 @@
-# browserwhisper
+# browser-whisper
 
 > Browser-native audio transcription powered by WebCodecs + Whisper
 
-`browserwhisper` is a zero-dependency\* TypeScript library that transcribes
+`browser-whisper` is a zero-dependency\* TypeScript library that transcribes
 audio and video files entirely inside the browser — no server required.
 
 It uses:
 - **[MediaBunny](https://github.com/nicholasgasior/mediabunny)** — fast WASM demuxer to unpack audio from any container (MP3, MP4, WebM, WAV …)
 - **WebCodecs AudioDecoder** — GPU-accelerated decoding
 - **[transformers.js](https://huggingface.co/docs/transformers.js)** — Whisper inference in WebGPU or WASM
-
-\*Peer dependencies: `@huggingface/transformers`, `mediabunny`
+- **Hybrid Quantization** — 4-bit decoder makes models 60% smaller with negligible accuracy loss
 
 ---
 
 ## Install
 
 ```bash
-npm install browserwhisper @huggingface/transformers mediabunny
+npm install browser-whisper
 # or
-bun add browserwhisper @huggingface/transformers mediabunny
+bun add browser-whisper
 ```
 
 ---
@@ -27,13 +26,18 @@ bun add browserwhisper @huggingface/transformers mediabunny
 ## Quick start
 
 ```ts
-import { Transcriber } from 'browserwhisper'
+import { BrowserWhisper } from 'browser-whisper'
 
-const transcriber = new Transcriber()
+// 1. Initialize with your desired configuration
+const whisper = new BrowserWhisper({
+  model: 'whisper-base', // Optional: defaults to whisper-base
+  language: 'en'         // Optional: defaults to auto-detect
+});
+
 const file = /* File from <input> or drag-and-drop */
 
-// Stream segments as they arrive
-for await (const segment of transcriber.transcribe(file)) {
+// 2. Stream segments as they arrive
+for await (const segment of whisper.transcribe(file)) {
   console.log(`[${segment.start.toFixed(1)}s] ${segment.text}`)
 }
 ```
@@ -41,14 +45,14 @@ for await (const segment of transcriber.transcribe(file)) {
 ### Collect all segments at once
 
 ```ts
-const segments = await transcriber.transcribe(file).collect()
+const segments = await whisper.transcribe(file).collect()
 console.log(segments.map(s => s.text).join(' '))
 ```
 
 ### With callbacks
 
 ```ts
-transcriber.transcribe(file, {
+whisper.transcribe(file, {
   model: 'whisper-small',
   language: 'en',
   onSegment: (seg) => appendToUI(seg),
@@ -60,11 +64,11 @@ transcriber.transcribe(file, {
 
 ## API
 
-### `new Transcriber()`
+### `new BrowserWhisper()`
 
 Creates a transcriber instance. Reusable across multiple files.
 
-### `transcriber.transcribe(file, options?)`
+### `whisper.transcribe(file, options?)`
 
 Returns a `TranscribeStream` that is both **async-iterable** and has a
 `.collect()` helper.
@@ -76,15 +80,49 @@ Returns a `TranscribeStream` that is both **async-iterable** and has a
 | `onSegment` | `(seg) => void` | — | Segment callback |
 | `onProgress` | `(evt) => void` | — | Progress callback |
 
+### Initialization Options
+
+When instantiating `new BrowserWhisper(options)`, you can configure:
+
+*   `model`: The Whisper model to use.
+    *   `whisper-tiny` (~30 MB download)
+    *   `whisper-base` (~55 MB download) - **Default**
+    *   `whisper-small` (~175 MB download)
+*   `language`: BCP-47 language code to force (e.g. `en`, `fr`). Defaults to auto-detect.
+
+_Note: You can override these options on a per-file basis by passing them as the second argument to `whisper.transcribe(file, { model: 'whisper-tiny' })`._
+
 ### `WhisperModel`
 
-`'whisper-tiny' | 'whisper-base' | 'whisper-small' | 'whisper-large'`
+`'whisper-tiny' | 'whisper-base' | 'whisper-small' | 'whisper-large' | 'distil-whisper/distil-small.en' | 'distil-whisper/distil-medium.en'`
 
 ### `TranscriptSegment`
 
 ```ts
 { text: string; start: number; end: number }
 ```
+
+---
+
+## 🚢 Publishing to NPM
+
+When you are ready to publish your library for others to use:
+
+1.  **Update Version:** Ensure the `version` field in `package.json` is correct (e.g. `1.0.0`).
+2.  **Build:** Run the production build command:
+    ```bash
+    bun run build
+    ```
+    This generates the `dist/` folder containing the compiled `index.js`, worker chunks, and type definitions.
+3.  **Login to NPM:** If you haven't already, log into your NPM account:
+    ```bash
+    npm login
+    ```
+4.  **Publish:** Publish the package to the public NPM registry:
+    ```bash
+    npm publish --access public
+    ```
+    _(Note: `bun publish` works as well if you are using Bun's package manager)._
 
 ---
 
