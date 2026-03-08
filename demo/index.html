@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Demo | browser-whisper</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #09090b;
+      --surface: #18181b;
+      --border: #27272a;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --accent: #3b82f6;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 2rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    a.back {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+    }
+
+    a.back:hover {
+      color: var(--text);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .controls {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    select,
+    button,
+    input[type="file"] {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    button {
+      background: var(--text);
+      color: var(--bg);
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s;
+    }
+
+    button:hover:not(:disabled) {
+      background: #e4e4e7;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.85rem;
+      color: var(--accent);
+    }
+
+    .media-container {
+      display: none;
+      width: 100%;
+    }
+
+    video,
+    audio {
+      width: 100%;
+      border-radius: 8px;
+      outline: none;
+      background: #000;
+      max-height: 400px;
+    }
+
+    .transcript {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      padding: 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+      display: none;
+    }
+
+    .transcript-item {
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .transcript-item:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .transcript-item span.time {
+      color: var(--accent);
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      margin-right: 0.5rem;
+    }
+
+    .transcript-item.active {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .json-output {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      background: #000;
+      padding: 1rem;
+      border-radius: 6px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.85rem;
+      color: #a1a1aa;
+      display: none;
+      white-space: pre-wrap;
+      margin: 0;
+    }
+
+    .section-header {
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .copy-btn {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>browser-whisper Demo</h1>
+      <a href="/" class="back">← Back to Home</a>
+    </div>
+
+    <div class="card">
+      <div class="controls">
+        <input type="file" id="fileInput" accept="audio/*,video/*" />
+        <select id="modelSelect">
+          <option value="whisper-tiny">Tiny (~30 MB)</option>
+          <option value="whisper-base" selected>Base (~55 MB)</option>
+          <option value="whisper-small">Small (~175 MB)</option>
+        </select>
+        <button id="transcribeBtn" disabled>Test Transcription</button>
+      </div>
+      <div class="status" id="statusLog">Ready for input. Select a file to begin.</div>
+    </div>
+
+    <div class="media-container" id="mediaContainer">
+      <!-- Native audio/video player injected here -->
+    </div>
+
+    <div id="transcriptSection" style="display:none">
+      <div class="section-header">Playback Sync</div>
+      <div class="transcript" id="transcriptBox"></div>
+    </div>
+
+    <div id="jsonSection" style="display:none">
+      <div class="section-header">
+        Raw JSON Output (Developer View)
+        <button class="copy-btn" id="copyBtn">Copy JSON</button>
+      </div>
+      <pre class="json-output" id="jsonBox"></pre>
+    </div>
+  </div>
+
+  <script type="module">
+    import { BrowserWhisper } from '/src/index.ts';
+
+    const $ = id => document.getElementById(id);
+    const fileInput = $('fileInput'), modelSelect = $('modelSelect'),
+      transcribeBtn = $('transcribeBtn'), statusLog = $('statusLog'),
+      mediaContainer = $('mediaContainer'), transcriptBox = $('transcriptBox'),
+      transcriptSection = $('transcriptSection'), jsonSection = $('jsonSection'),
+      jsonBox = $('jsonBox'), copyBtn = $('copyBtn');
+
+    let file = null;
+    let mediaEl = null;
+    let segments = [];
+    let rawSegments = [];
+
+    // format seconds to M:SS
+    const fmt = s => { if (!isFinite(s)) return '0:00'; const m = Math.floor(s / 60); return `${m}:${Math.floor(s % 60).toString().padStart(2, '0')}`; };
+
+    fileInput.addEventListener('change', () => {
+      file = fileInput.files?.[0] || null;
+      if (file) transcribeBtn.disabled = false;
+    });
+
+    transcribeBtn.addEventListener('click', async () => {
+      if (!file) return;
+
+      transcribeBtn.disabled = true;
+      transcriptBox.innerHTML = '';
+      jsonBox.textContent = '';
+      transcriptSection.style.display = 'block';
+      jsonSection.style.display = 'none';
+      transcriptBox.style.display = 'block';
+      segments = [];
+      rawSegments = [];
+
+      // Set up native media player
+      mediaContainer.innerHTML = '';
+      mediaContainer.style.display = 'block';
+      const url = URL.createObjectURL(file);
+      mediaEl = document.createElement(file.type.startsWith('video/') ? 'video' : 'audio');
+      mediaEl.controls = true;
+      mediaEl.src = url;
+      mediaContainer.appendChild(mediaEl);
+
+      // Sync visual highlights with native player timeupdate
+      mediaEl.addEventListener('timeupdate', () => {
+        const t = mediaEl.currentTime;
+        segments.forEach(seg => {
+          seg.el.classList.toggle('active', t >= seg.start && t <= seg.end + 0.5);
+        });
+      });
+
+      const model = modelSelect.value;
+      const whisper = new BrowserWhisper({ model });
+
+      let iterCount = 0;
+
+      try {
+        const stream = whisper.transcribe(file, {
+          onProgress({ stage, progress }) {
+            const pct = Math.round(progress * 100);
+            if (stage === 'decoding') {
+              statusLog.textContent = `[system] ${stage} audio chunks... ${pct}%`;
+            } else {
+              statusLog.textContent = `[system] status: ${stage}`;
+            }
+          }
+        });
+
+        for await (const { text, start, end } of stream) {
+          iterCount++;
+          const cleanText = text.trim();
+          rawSegments.push({ text: cleanText, start, end });
+
+          const div = document.createElement('div');
+          div.className = 'transcript-item';
+          div.innerHTML = `<span class="time">[${fmt(start)}]</span> <span>${cleanText}</span>`;
+
+          // Click to seek native player
+          div.addEventListener('click', () => {
+            mediaEl.currentTime = start;
+            mediaEl.play();
+          });
+
+          segments.push({ start, end, el: div });
+          transcriptBox.appendChild(div);
+          transcriptBox.scrollTop = transcriptBox.scrollHeight;
+        }
+
+        statusLog.textContent = `[done] Completed transcription spanning ${iterCount} segments.`;
+        jsonBox.textContent = JSON.stringify(rawSegments, null, 2);
+        jsonSection.style.display = 'block';
+
+      } catch (err) {
+        statusLog.textContent = `[error] ${err.message}`;
+      } finally {
+        transcribeBtn.disabled = false;
+      }
+    });
+
+    // Copy button logic
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(jsonBox.textContent);
+      const original = copyBtn.textContent;
+      copyBtn.textContent = 'Copied!';
+      setTimeout(() => copyBtn.textContent = original, 2000);
+    });
+  </script>
+</body>
+
+</html>
