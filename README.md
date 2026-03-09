@@ -14,6 +14,8 @@ By automatically orchestrating Web Workers, maintaining inference queues, and
 handling memory-safe decoding, `browser-whisper` lets you drop OpenAI's Whisper 
 model into any frontend application in just three lines of code.
 
+**[Try the Live Demo](https://whisper.tanpreet.xyz)**
+
 ---
 
 ## Install
