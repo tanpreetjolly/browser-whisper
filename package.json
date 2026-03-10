@@ -2,7 +2,7 @@
   "name": "browser-whisper",
   "version": "0.1.0",
   "type": "module",
-  "description": "Browser-native audio transcription with WebCodecs and Whisper",
+  "description": "Browser-native audio transcription powered by WebGPU Whisper — zero server, fully local.",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -24,18 +24,31 @@
     "build:site": "bun --bun vite build -c vite.demo.config.ts",
     "typecheck": "tsc --noEmit",
     "preview": "bun --bun vite preview",
-    "test": "bun test"
+    "test": "bun test",
+    "prepublishOnly": "bun run build"
   },
   "keywords": [
     "whisper",
     "transcription",
     "webcodecs",
+    "webgpu",
     "speech-to-text",
-    "browser"
+    "browser",
+    "local",
+    "offline",
+    "transformers.js"
   ],
   "sideEffects": false,
-  "author": "Your Name",
+  "author": "Tanpreet Singh Jolly",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tanpreetjolly/browser-whisper.git"
+  },
+  "homepage": "https://github.com/tanpreetjolly/browser-whisper#readme",
+  "bugs": {
+    "url": "https://github.com/tanpreetjolly/browser-whisper/issues"
+  },
   "dependencies": {
     "@huggingface/transformers": "^3.8.1",
     "mediabunny": "^1.35.1"
