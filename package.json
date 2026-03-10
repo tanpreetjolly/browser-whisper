@@ -20,7 +20,7 @@
   "scripts": {
     "dev": "bun --bun vite",
     "dev:site": "bun --bun vite -c vite.demo.config.ts",
-    "build": "bun run typecheck && bun --bun vite build",
+    "build": "bun --bun vite build && tsc --emitDeclarationOnly",
     "build:site": "bun --bun vite build -c vite.demo.config.ts",
     "typecheck": "tsc --noEmit",
     "preview": "bun --bun vite preview",
@@ -48,6 +48,9 @@
   "homepage": "https://github.com/tanpreetjolly/browser-whisper#readme",
   "bugs": {
     "url": "https://github.com/tanpreetjolly/browser-whisper/issues"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
     "@huggingface/transformers": "^3.8.1",

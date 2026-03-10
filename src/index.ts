@@ -9,7 +9,6 @@ export type {
     TranscriptSegment,
     TranscribeOptions,
     TranscribeProgress,
-    PCMChunk,
 } from './types.js';
 
 // ── Error classes ────────────────────────────────────────────────────────────

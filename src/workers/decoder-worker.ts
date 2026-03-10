@@ -222,6 +222,7 @@ async function run(file: File): Promise<void> {
 
     // ── 8. Flush decoder and chunker ─────────────────────────────────────────
     await decoder.flush();
+    decoder.close();
     chunker.flush();
 
     postMain({ type: 'progress', event: { stage: 'decoding', progress: 1 } });

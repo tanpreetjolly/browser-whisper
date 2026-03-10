@@ -22,7 +22,10 @@ export type QuantizationType = 'fp32' | 'fp16' | 'q8' | 'q4' | 'hybrid';
 // Public API types
 // ---------------------------------------------------------------------------
 
-/** A single word with its precise timestamp */
+/**
+ * A single word with its precise timestamp.
+ * @experimental Not currently produced — reserved for future word-level timestamp support.
+ */
 export interface WordTimestamp {
     text: string;
     /** Start time in seconds, relative to the beginning of the file */
@@ -38,7 +41,10 @@ export interface TranscriptSegment {
     start: number;
     /** End time in seconds, relative to the beginning of the file */
     end: number;
-    /** Per-word timestamps (available when using word-level timestamps) */
+    /**
+     * Per-word timestamps (available when using word-level timestamps).
+     * @experimental Not currently populated — reserved for future support.
+     */
     words?: WordTimestamp[];
 }
 

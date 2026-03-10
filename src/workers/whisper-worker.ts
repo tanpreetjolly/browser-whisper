@@ -138,7 +138,6 @@ self.onmessage = async (e: MessageEvent) => {
                     asrPipeline = await loadPipeline('wasm');
                 }
 
-
                 // Compile WebGPU shaders by running a dummy inference
                 // WebGPU has a cold-start delay of 1-5s for shader compilation on the first run.
                 // Doing this here (before the user uploads a file) hides that delay.
