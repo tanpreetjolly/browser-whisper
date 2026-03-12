@@ -11,13 +11,26 @@ export default defineConfig({
     },
     target: 'es2022',
     rollupOptions: {
+      output: {
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name?.endsWith('.wasm')) {
+            return 'assets/[name]-[hash][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        }
+      },
       // Externalize dependencies so they aren't bundled (NPM handles installing them)
-      external: ['@huggingface/transformers', 'mediabunny'],
+      external: ['@huggingface/transformers', 'mediabunny', 'onnxruntime-web'],
     },
   },
 
   // Workers are themselves ES modules (required for transferable streams etc.)
-  worker: { format: 'es' },
+  worker: { 
+    format: 'es',
+    rollupOptions: {
+      external: ['@huggingface/transformers', 'mediabunny', 'onnxruntime-web'],
+    }
+  },
 
   server: {
     headers: {
@@ -29,6 +42,6 @@ export default defineConfig({
 
   optimizeDeps: {
     // Exclude from pre-bundling – both are WASM/ESM and must stay as-is
-    exclude: ['@huggingface/transformers', 'mediabunny'],
+    exclude: ['@huggingface/transformers', 'mediabunny', 'onnxruntime-web'],
   },
 })
