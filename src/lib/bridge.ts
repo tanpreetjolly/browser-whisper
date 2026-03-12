@@ -19,6 +19,9 @@ import { BrowserWhisperError } from '../errors.js';
 import { Chunker } from './chunker.js';
 import { downmixToMono, resampleTo16kHz } from './resampler.js';
 
+import DecoderWorker from '../workers/decoder-worker.ts?worker&inline';
+import WhisperWorker from '../workers/whisper-worker.ts?worker&inline';
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -43,16 +46,9 @@ export class Bridge {
     constructor(callbacks: BridgeCallbacks) {
         this.callbacks = callbacks;
 
-        // Vite bundles worker files as separate ES module chunks; the new URL()
-        // pattern tells Vite to treat the path as a worker entry point.
-        this.decoderWorker = new Worker(
-            new URL('../workers/decoder-worker.ts', import.meta.url),
-            { type: 'module' },
-        );
-        this.whisperWorker = new Worker(
-            new URL('../workers/whisper-worker.ts', import.meta.url),
-            { type: 'module' },
-        );
+        // Vite inline worker imports to avoid Next.js / Webpack resolution issues
+        this.decoderWorker = new DecoderWorker();
+        this.whisperWorker = new WhisperWorker();
 
         // Route messages from the Whisper worker
         this.whisperWorker.onmessage = (e: MessageEvent<MainThreadMessage>) => {
