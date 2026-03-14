@@ -5,7 +5,7 @@
 [![bundle size](https://img.shields.io/bundlephobia/minzip/browser-whisper)](https://bundlephobia.com/package/browser-whisper)
 
 > Browser-native audio transcription powered by WebCodecs + WebGPU. No server. No API keys.
-`
+
 `browser-whisper` runs OpenAI's Whisper model entirely in the browser. It uses **WebCodecs** to decode audio from any file format with hardware acceleration, and **WebGPU** to run ONNX inference — falling back to WASM automatically when either is unavailable.
 
 **[Live Demo →](https://whisper.tanpreet.xyz)** · **[Vite example →](https://github.com/tanpreetjolly/browser-whisper-vite-demo)** · **[Next.js example →](https://github.com/tanpreetjolly/browser-whisper-nextjs-demo)**
