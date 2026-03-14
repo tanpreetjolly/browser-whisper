@@ -511,9 +511,9 @@
             <span id="fileName">Choose file</span>
           </label>
           <select id="modelSelect">
-            <option value="whisper-tiny">Tiny (~30 MB)</option>
-            <option value="whisper-base" selected>Base (~55 MB)</option>
-            <option value="whisper-small">Small (~175 MB)</option>
+            <option value="whisper-tiny">Tiny (~64 MB)</option>
+            <option value="whisper-base" selected>Base (~136 MB)</option>
+            <option value="whisper-small">Small (~510 MB)</option>
           </select>
           <button id="transcribeBtn" disabled>Transcribe</button>
         </div>
@@ -645,7 +645,7 @@
               if (progress === 1) {
                 statusLog.textContent = 'WebGPU model cached and ready.';
               } else {
-                statusLog.textContent = `Downloading model… ${pct}% (first run only)`;
+                statusLog.textContent = 'Downloading model… (first run only)';
               }
             } else if (stage === 'decoding') {
               statusLog.textContent = `Decoding audio… ${pct}%`;
