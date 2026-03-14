@@ -6,15 +6,15 @@
  *  - Routing messages from the Whisper worker back to the caller via callbacks
  *
  * ── Bundler compatibility ─────────────────────────────────────────────────────
- * Currently Vite-only: workers are imported with Vite's `?worker&inline` syntax,
- * which bundles each worker as a self-contained blob URL at build time.
+ * Workers use `new Worker(new URL(..., import.meta.url))` — the standard pattern
+ * that both Vite and webpack/Next.js understand. Workers are built as separate
+ * ES module chunks in dist/ so consumers' bundlers can resolve them correctly.
  *
  * Next.js / Webpack support (future):
- *   The `?worker&inline` imports below are the only Vite-specific lines.
- *   To support Next.js, replace them with constructor injection — i.e. accept
- *   `{ decoderWorker: Worker; whisperWorker: Worker }` from the caller, who
- *   creates the workers using whatever bundler syntax their framework requires
- *   (e.g. `new Worker(new URL('../workers/whisper-worker.ts', import.meta.url))`).
+ *   This pattern is natively understood by webpack 5, but Next.js requires the
+ *   worker files to be in the `public/` directory or handled via a custom loader.
+ *   An alternative is constructor injection — accepting pre-built Worker instances
+ *   from the caller, so each framework can create them with its own syntax.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -31,9 +31,6 @@ import { BrowserWhisperError } from '../errors.js';
 import { Chunker } from './chunker.js';
 import { downmixToMono, resampleTo16kHz } from './resampler.js';
 
-// Vite-only: inline worker imports — see note at top of file for Next.js path
-import DecoderWorker from '../workers/decoder-worker.ts?worker&inline';
-import WhisperWorker from '../workers/whisper-worker.ts?worker&inline';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -59,8 +56,14 @@ export class Bridge {
     constructor(callbacks: BridgeCallbacks) {
         this.callbacks = callbacks;
 
-        this.decoderWorker = new DecoderWorker();
-        this.whisperWorker = new WhisperWorker();
+        this.decoderWorker = new Worker(
+            new URL('../workers/decoder-worker.ts', import.meta.url),
+            { type: 'module' },
+        );
+        this.whisperWorker = new Worker(
+            new URL('../workers/whisper-worker.ts', import.meta.url),
+            { type: 'module' },
+        );
 
         // Route messages from the Whisper worker
         this.whisperWorker.onmessage = (e: MessageEvent<MainThreadMessage>) => {

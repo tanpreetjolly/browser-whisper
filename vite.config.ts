@@ -3,7 +3,6 @@ import { resolve } from 'path'
 
 export default defineConfig({
   build: {
-    assetsInlineLimit: 0,
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       formats: ['es'],
@@ -11,13 +10,15 @@ export default defineConfig({
     },
     target: 'es2022',
     rollupOptions: {
+      // Build the two workers as separate ES chunks alongside the main entry
+      input: {
+        index: resolve(__dirname, 'src/index.ts'),
+        'decoder-worker': resolve(__dirname, 'src/workers/decoder-worker.ts'),
+        'whisper-worker': resolve(__dirname, 'src/workers/whisper-worker.ts'),
+      },
       output: {
-        assetFileNames: (assetInfo) => {
-          if (assetInfo.name?.endsWith('.wasm')) {
-            return 'assets/[name]-[hash][extname]';
-          }
-          return 'assets/[name]-[hash][extname]';
-        }
+        entryFileNames: '[name].js',
+        chunkFileNames: 'chunks/[name]-[hash].js',
       },
       // Keep heavy deps external — consumers' bundler resolves them from
       // node_modules, letting it handle onnxruntime-web's internal dynamic
@@ -27,23 +28,11 @@ export default defineConfig({
   },
 
   // Workers are ES modules (required for transferable streams etc.)
-  // `?worker&inline` bundles each worker as a self-contained blob URL —
-  // this is Vite-specific syntax and will not work with Next.js / Webpack.
-  // See src/lib/bridge.ts for the Next.js migration path (constructor injection).
   worker: {
     format: 'es',
     rollupOptions: {
       external: ['@huggingface/transformers', 'mediabunny', 'onnxruntime-web'],
     },
-  },
-
-  resolve: {
-    alias: [
-      {
-        find: /\.wasm(\?url)?$/,
-        replacement: resolve(__dirname, 'src/lib/empty-wasm.js')
-      }
-    ]
   },
 
   server: {
@@ -55,7 +44,7 @@ export default defineConfig({
   },
 
   optimizeDeps: {
-    // Exclude from pre-bundling – both are WASM/ESM and must stay as-is
-    exclude: ['@huggingface/transformers', 'mediabunny', 'onnxruntime-web'],
+    // Exclude from pre-bundling — WASM/ESM packages must stay as-is
+    exclude: ['@huggingface/transformers', 'mediabunny'],
   },
 })
