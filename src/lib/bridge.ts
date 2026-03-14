@@ -6,15 +6,14 @@
  *  - Routing messages from the Whisper worker back to the caller via callbacks
  *
  * ── Bundler compatibility ─────────────────────────────────────────────────────
- * Workers use `new Worker(new URL(..., import.meta.url))` — the standard pattern
- * that both Vite and webpack/Next.js understand. Workers are built as separate
- * ES module chunks in dist/ so consumers' bundlers can resolve them correctly.
+ * Workers use `?worker&inline` so Vite bundles each into a self-contained blob
+ * URL at build time. The published dist/index.js contains plain
+ * `URL.createObjectURL(new Blob([...]))` calls, so it works in any JS runtime.
  *
- * Next.js / Webpack support (future):
- *   This pattern is natively understood by webpack 5, but Next.js requires the
- *   worker files to be in the `public/` directory or handled via a custom loader.
- *   An alternative is constructor injection — accepting pre-built Worker instances
- *   from the caller, so each framework can create them with its own syntax.
+ * All dependencies (@huggingface/transformers, mediabunny, onnxruntime-web)
+ * are bundled into the blobs — bare specifiers cannot be resolved from a
+ * blob: URL at runtime. WASM binaries are excluded via the .wasm alias and
+ * loaded from CDN at runtime via env.backends.onnx.wasm.wasmPaths instead.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 
@@ -31,6 +30,11 @@ import { BrowserWhisperError } from '../errors.js';
 import { Chunker } from './chunker.js';
 import { downmixToMono, resampleTo16kHz } from './resampler.js';
 
+// `?worker&inline` bundles each worker as a self-contained blob URL so that
+// bare module specifiers (e.g. @huggingface/transformers) are resolved at
+// build time rather than at runtime — blob: URLs cannot resolve bare specifiers.
+import DecoderWorker from '../workers/decoder-worker.ts?worker&inline';
+import WhisperWorker from '../workers/whisper-worker.ts?worker&inline';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -56,14 +60,8 @@ export class Bridge {
     constructor(callbacks: BridgeCallbacks) {
         this.callbacks = callbacks;
 
-        this.decoderWorker = new Worker(
-            new URL('../workers/decoder-worker.ts', import.meta.url),
-            { type: 'module' },
-        );
-        this.whisperWorker = new Worker(
-            new URL('../workers/whisper-worker.ts', import.meta.url),
-            { type: 'module' },
-        );
+        this.decoderWorker = new DecoderWorker();
+        this.whisperWorker = new WhisperWorker();
 
         // Route messages from the Whisper worker
         this.whisperWorker.onmessage = (e: MessageEvent<MainThreadMessage>) => {

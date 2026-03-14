@@ -10,29 +10,36 @@ export default defineConfig({
     },
     target: 'es2022',
     rollupOptions: {
-      // Build the two workers as separate ES chunks alongside the main entry
-      input: {
-        index: resolve(__dirname, 'src/index.ts'),
-        'decoder-worker': resolve(__dirname, 'src/workers/decoder-worker.ts'),
-        'whisper-worker': resolve(__dirname, 'src/workers/whisper-worker.ts'),
-      },
-      output: {
-        entryFileNames: '[name].js',
-        chunkFileNames: 'chunks/[name]-[hash].js',
-      },
-      // Keep heavy deps external — consumers' bundler resolves them from
-      // node_modules, letting it handle onnxruntime-web's internal dynamic
-      // imports (ort-webgpu.mjs etc.) correctly.
+      // Keep heavy deps external in the main bundle — they get bundled into
+      // the worker blobs separately via the worker config below.
       external: ['@huggingface/transformers', 'mediabunny', 'onnxruntime-web'],
     },
   },
 
-  // Workers are ES modules (required for transferable streams etc.)
+  // Worker build: intentionally bundles ALL dependencies into the blob.
+  // Blob URL workers cannot resolve bare module specifiers at runtime, so
+  // everything (@huggingface/transformers, mediabunny, onnxruntime-web) must
+  // be inlined. WASM binaries are aliased to an empty stub to keep blob size
+  // small — the actual WASM is fetched from CDN via env.backends.onnx.wasm.wasmPaths.
   worker: {
     format: 'es',
     rollupOptions: {
-      external: ['@huggingface/transformers', 'mediabunny', 'onnxruntime-web'],
+      external: [],
     },
+  },
+
+  resolve: {
+    alias: [
+      {
+        // Replace all .wasm imports with an empty stub so WASM binaries are
+        // never bundled into the worker blob. At runtime, onnxruntime-web
+        // loads them via wasmPaths (CDN) instead.
+        // NOTE: find is applied as id.replace(find, replacement), so the
+        // regex must match the ENTIRE module ID to avoid partial substitution.
+        find: /^.*\.wasm(\?url)?$/,
+        replacement: resolve(__dirname, 'src/lib/empty-wasm.js'),
+      },
+    ],
   },
 
   server: {
@@ -45,6 +52,6 @@ export default defineConfig({
 
   optimizeDeps: {
     // Exclude from pre-bundling — WASM/ESM packages must stay as-is
-    exclude: ['@huggingface/transformers', 'mediabunny'],
+    exclude: ['@huggingface/transformers', 'mediabunny', 'onnxruntime-web'],
   },
 })
