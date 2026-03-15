@@ -353,7 +353,7 @@
     .results-header {
       display: flex;
       align-items: center;
-      background: var(--gray-50);
+      background: var(--bg); /* Match card background */
       border-bottom: 1px solid var(--border);
     }
 
@@ -361,10 +361,11 @@
       display: flex;
       flex: 1;
       overflow-x: auto; /* Allow scrolling if tabs get too wide */
+      background-color: transparent;
     }
 
     .results-tab {
-      background: none;
+      background-color: transparent !important;
       border: none;
       border-bottom: 2px solid transparent;
       color: var(--gray-500);
@@ -384,19 +385,23 @@
 
     .results-tab:hover {
       color: var(--fg);
+      background-color: transparent !important;
+      opacity: 0.8;
     }
 
     .results-tab.active {
       color: var(--fg);
-      background: var(--bg);
+      background-color: transparent !important;
       border-bottom-color: var(--fg);
       z-index: 2; /* Ensure active tab covers the bottom border */
+      opacity: 1;
     }
 
     .tab-actions {
       display: flex;
       align-items: center;
       padding: 0 1rem;
+      background: transparent;
     }
 
     .copy-btn {
