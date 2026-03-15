@@ -10,28 +10,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     :root {
-      /* Darkened Rose Pine Moon inspired palette */
-      --base: #14131f;
-      /* was #232136 */
-      --surface: #1a1827;
-      /* was #2a273f */
-      --overlay: #2a273f;
-      --muted: #6e6a86;
-      --subtle: #908caa;
-      --text: #e0def4;
-      --love: #eb6f92;
-      --gold: #f6c177;
-      --rose: #ea9a97;
-      --pine: #3e8fb0;
-      --foam: #9ccfd8;
-      --iris: #c4a7e7;
-      --highlight: rgba(234, 154, 151, 0.15);
+      --bg: #ffffff;
+      --fg: #171717;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-800: #1f2937;
+      --border: #e5e7eb;
+      --ring: rgba(0, 0, 0, 0.1);
+      --radius: 8px;
     }
 
     body {
-      background-color: var(--base);
-      color: var(--text);
-      font-family: "JetBrains Mono", "Fira Code", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background-color: var(--bg);
+      color: var(--fg);
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       margin: 0;
       padding: 2rem;
       min-height: 100vh;
@@ -45,95 +40,97 @@
 
     .container {
       width: 100%;
-      max-width: 720px;
+      max-width: 640px;
       display: flex;
       flex-direction: column;
-      gap: 2.5rem;
+      gap: 3.5rem;
     }
 
     header {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 1rem;
     }
 
     .title-row {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
     h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
+      font-size: 1.75rem;
+      font-weight: 600;
       margin: 0;
-      color: var(--rose);
+      color: var(--fg);
       letter-spacing: -0.02em;
     }
 
     .version {
-      color: var(--gold);
-      font-size: 0.85rem;
-      background: var(--surface);
+      color: var(--gray-500);
+      font-size: 0.75rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: var(--gray-100);
       padding: 0.2rem 0.5rem;
       border-radius: 4px;
+      border: 1px solid var(--border);
     }
 
     .description {
-      color: var(--subtle);
-      font-size: 0.95rem;
+      color: var(--gray-500);
+      font-size: 1rem;
+      line-height: 1.7;
       margin: 0;
       max-width: 600px;
     }
 
     .description a {
-      color: var(--pine);
-      text-decoration: underline dashed var(--muted);
+      color: var(--fg);
+      text-decoration: underline;
       text-underline-offset: 4px;
+      text-decoration-color: var(--gray-300);
       transition: all 0.15s;
-      position: relative;
-      z-index: 10;
     }
 
     .description a:hover {
-      color: var(--foam);
-      text-decoration: underline solid var(--foam);
+      text-decoration-color: var(--fg);
     }
 
     /* Command Line Block */
     .cmd-panel {
-      background: var(--surface);
-      border: 1px solid var(--overlay);
-      border-radius: 6px;
-      padding: 1.5rem;
-      position: relative;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: 0 1px 2px var(--ring);
     }
 
     .cmd-header {
       display: flex;
-      gap: 1rem;
-      margin-bottom: 1rem;
-      border-bottom: 1px dashed var(--overlay);
-      padding-bottom: 0.75rem;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1rem;
     }
 
     .pkg-manager {
-      color: var(--muted);
+      color: var(--gray-400);
       font-size: 0.85rem;
       cursor: pointer;
       background: transparent;
       border: none;
       padding: 0;
       font-family: inherit;
+      font-weight: 500;
+      transition: color 0.15s;
     }
 
     .pkg-manager:hover {
-      color: var(--text);
+      color: var(--fg);
     }
 
     .pkg-manager.active {
-      color: var(--foam);
-      font-weight: bold;
+      color: var(--fg);
     }
 
     .cmd-line {
@@ -143,39 +140,42 @@
     }
 
     .cmd-text {
-      color: var(--text);
-      font-size: 0.95rem;
+      color: var(--fg);
+      font-size: 0.9rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
     .cmd-text::before {
       content: "$ ";
-      color: var(--love);
+      color: var(--gray-400);
     }
 
     .copy-btn {
-      background: var(--overlay);
-      color: var(--text);
-      border: none;
-      padding: 0.4rem 0.8rem;
+      background: var(--bg);
+      color: var(--fg);
+      border: 1px solid var(--border);
+      padding: 0.35rem 0.75rem;
       font-size: 0.75rem;
-      border-radius: 4px;
+      font-weight: 500;
+      border-radius: 6px;
       cursor: pointer;
       font-family: inherit;
-      transition: all 0.2s ease;
+      transition: all 0.15s ease;
+      box-shadow: 0 1px 2px var(--ring);
     }
 
     .copy-btn:hover {
-      background: var(--muted);
+      background: var(--gray-100);
     }
 
     /* Snippet Panel */
     .snippet-panel {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--overlay);
-      border-radius: 6px;
-      padding: 1.5rem;
+      background: var(--gray-100);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
       text-align: left;
-      margin-top: 1.5rem;
+      margin-top: 2rem;
       position: relative;
     }
 
@@ -184,76 +184,64 @@
       position: absolute;
       top: -10px;
       left: 1rem;
-      background: var(--base);
+      background: var(--bg);
       padding: 0 0.5rem;
-      font-size: 0.8rem;
-      color: var(--pine);
-      font-weight: 600;
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      font-weight: 500;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
 
     .code-block {
       margin: 0;
       font-size: 0.85rem;
-      line-height: 1.5;
-      color: var(--text);
+      line-height: 1.6;
+      color: var(--fg);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
       white-space: pre;
       overflow-x: auto;
     }
 
     /* Basic Syntax Highlighting */
-    .k {
-      color: var(--pine);
-    }
-
-    /* keyword */
-    .s {
-      color: var(--gold);
-    }
-
-    /* string */
-    .f {
-      color: var(--rose);
-    }
-
-    /* function */
-    .c {
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    /* comment */
-    .n {
-      color: var(--text);
-    }
-
-    /* normal */
+    .k { color: #d73a49; } /* keyword */
+    .s { color: #032f62; } /* string */
+    .f { color: #6f42c1; } /* function */
+    .c { color: var(--gray-500); font-style: italic; } /* comment */
+    .n { color: var(--fg); } /* normal */
 
     /* Navigation Links */
     .nav-links {
       display: flex;
-      gap: 1.5rem;
+      gap: 2rem;
       font-size: 0.95rem;
+      flex-wrap: wrap;
+      padding-top: 1rem;
     }
 
     .nav-links a {
-      color: var(--pine);
+      color: var(--gray-500);
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.35rem;
       transition: color 0.15s;
+      font-weight: 500;
     }
 
     .nav-links a:hover {
-      color: var(--foam);
-      text-decoration: underline;
-      text-underline-offset: 4px;
+      color: var(--fg);
     }
 
-    .nav-links a::before {
-      content: "->";
-      color: var(--muted);
-      font-size: 0.85rem;
+    .nav-links a::after {
+      content: "↗";
+      font-size: 0.8em;
+      opacity: 0.5;
+    }
+    
+    .nav-links a[href^="/"]::after {
+      content: "→";
     }
   </style>
 </head>
@@ -293,10 +281,8 @@
       <div class="snippet-panel">
         <pre class="code-block"><span class="k">import</span> { <span class="n">BrowserWhisper</span> } <span class="k">from</span> <span class="s">'browser-whisper'</span>;
 
-<span class="c">// 1. Initialize the library</span>
 <span class="k">const</span> <span class="n">whisper</span> = <span class="k">new</span> <span class="f">BrowserWhisper</span>({ model: <span class="s">'whisper-base'</span> });
 
-<span class="c">// 2. Transcribe an audio/video file</span>
 <span class="k">for await</span> (<span class="k">const</span> { <span class="n">text</span>, <span class="n">start</span>, <span class="n">end</span> } <span class="k">of</span> <span class="n">whisper</span>.<span class="f">transcribe</span>(<span class="n">file</span>)) {
     <span class="n">console</span>.<span class="f">log</span>(<span class="s">`[${start}-${end}s]: ${text}`</span>);
 }</pre>
@@ -329,11 +315,11 @@
       navigator.clipboard.writeText(codeEl.textContent);
       const originalText = copyBtn.textContent;
       copyBtn.textContent = 'copied';
-      copyBtn.style.color = 'var(--foam)';
+      copyBtn.style.color = 'var(--fg)';
 
       setTimeout(() => {
         copyBtn.textContent = originalText;
-        copyBtn.style.color = 'var(--text)';
+        copyBtn.style.color = 'var(--fg)';
       }, 2000);
     });
   </script>
