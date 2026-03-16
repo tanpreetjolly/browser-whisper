@@ -333,6 +333,135 @@
     .nav-links a[href^="/"]::after {
       content: "→";
     }
+
+    /* ── Models Table ────────────────────────────────────── */
+    .models-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      padding-top: 5rem;
+      padding-bottom: 8rem;
+    }
+
+    .models-section .section-label {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--gray-400);
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .model-table-wrap {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 1px 2px var(--ring);
+    }
+
+    .model-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.75rem;
+    }
+
+    .model-table thead th {
+      text-align: left;
+      color: var(--gray-400);
+      font-weight: 400;
+      font-size: 0.75rem;
+      padding: 0.7rem 1.25rem;
+      background: var(--gray-100);
+      border-bottom: 1px solid var(--border);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .model-table thead th.th-center {
+      text-align: center;
+    }
+
+    .model-table tbody td {
+      padding: 0.75rem 1.25rem;
+      color: var(--gray-500);
+      border-bottom: 1px solid var(--gray-100);
+      vertical-align: middle;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .model-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .model-table code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8rem;
+      color: var(--fg);
+      background: var(--gray-100);
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .model-table .td-center {
+      text-align: center;
+    }
+
+    .model-table .td-check {
+      color: var(--fg);
+      text-align: center;
+    }
+
+    .model-table .td-dash {
+      color: var(--gray-300);
+      text-align: center;
+    }
+
+    .model-table .td-muted {
+      color: var(--gray-400);
+    }
+
+    .lang-note {
+      font-size: 0.75rem;
+      font-weight: 400;
+      color: var(--gray-500);
+      margin: 0;
+      line-height: 1.8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .lang-note code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8rem;
+      color: var(--fg);
+      background: var(--gray-100);
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      border: 1px solid var(--border);
+    }
+
+    .lang-codes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .lang-codes span {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.65rem;
+      color: var(--gray-400);
+      background: var(--gray-100);
+      border: 1px solid var(--border);
+      padding: 0.15rem 0.45rem;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
   </style>
 </head>
 
@@ -342,7 +471,7 @@
     <header>
       <div class="title-row">
         <h1>browser-whisper</h1>
-        <span class="version">v0.8.0</span>
+        <span class="version">v1.0.0</span>
       </div>
       <p class="description">
         Native <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebGPU_API" target="_blank" rel="noopener noreferrer">WebGPU</a> audio
@@ -394,6 +523,79 @@
       <a href="https://github.com/tanpreetjolly/browser-whisper-vite-demo" target="_blank" rel="noopener noreferrer">Vite example</a>
       <a href="https://github.com/tanpreetjolly/browser-whisper-nextjs-demo" target="_blank" rel="noopener noreferrer">Next.js example</a>
     </nav>
+
+    <section class="models-section" aria-label="Model overview">
+      <p class="section-label">Models &amp; language support</p>
+
+      <div class="model-table-wrap">
+        <table class="model-table">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Languages</th>
+              <th class="th-center"><code style="background:none;border:none;padding:0;color:inherit">language</code></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>whisper-tiny</code></td>
+              <td>Multilingual · 99 languages</td>
+              <td class="td-check">✓</td>
+            </tr>
+            <tr>
+              <td><code>whisper-base</code></td>
+              <td>Multilingual · 99 languages</td>
+              <td class="td-check">✓</td>
+            </tr>
+            <tr>
+              <td><code>whisper-small</code></td>
+              <td>Multilingual · 99 languages</td>
+              <td class="td-check">✓</td>
+            </tr>
+            <tr>
+              <td><code>moonshine-tiny</code></td>
+              <td class="td-muted">English only</td>
+              <td class="td-dash">—</td>
+            </tr>
+            <tr>
+              <td><code>moonshine-base</code></td>
+              <td class="td-muted">English only</td>
+              <td class="td-dash">—</td>
+            </tr>
+            <tr>
+              <td><code>distil-whisper-small</code></td>
+              <td class="td-muted">English only</td>
+              <td class="td-dash">—</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="lang-note">Pass any BCP-47 code as <code>language</code> to skip auto-detection — slightly faster and more accurate when the language is known.</p>
+
+      <div class="lang-codes" aria-label="Supported BCP-47 language codes">
+        <span>af</span><span>am</span><span>ar</span><span>as</span><span>az</span>
+        <span>ba</span><span>be</span><span>bg</span><span>bn</span><span>bo</span>
+        <span>br</span><span>bs</span><span>ca</span><span>cs</span><span>cy</span>
+        <span>da</span><span>de</span><span>el</span><span>en</span><span>es</span>
+        <span>et</span><span>eu</span><span>fa</span><span>fi</span><span>fo</span>
+        <span>fr</span><span>gl</span><span>gu</span><span>ha</span><span>haw</span>
+        <span>he</span><span>hi</span><span>hr</span><span>ht</span><span>hu</span>
+        <span>hy</span><span>id</span><span>is</span><span>it</span><span>ja</span>
+        <span>jw</span><span>ka</span><span>kk</span><span>km</span><span>kn</span>
+        <span>ko</span><span>la</span><span>lb</span><span>ln</span><span>lo</span>
+        <span>lt</span><span>lv</span><span>mg</span><span>mi</span><span>mk</span>
+        <span>ml</span><span>mn</span><span>mr</span><span>ms</span><span>mt</span>
+        <span>my</span><span>ne</span><span>nl</span><span>nn</span><span>no</span>
+        <span>oc</span><span>pa</span><span>pl</span><span>ps</span><span>pt</span>
+        <span>ro</span><span>ru</span><span>sa</span><span>sd</span><span>si</span>
+        <span>sk</span><span>sl</span><span>sn</span><span>so</span><span>sq</span>
+        <span>sr</span><span>su</span><span>sv</span><span>sw</span><span>ta</span>
+        <span>te</span><span>tg</span><span>th</span><span>tk</span><span>tl</span>
+        <span>tr</span><span>tt</span><span>uk</span><span>ur</span><span>uz</span>
+        <span>vi</span><span>yi</span><span>yo</span><span>zh</span><span>yue</span>
+      </div>
+    </section>
   </div>
 
   <script>
