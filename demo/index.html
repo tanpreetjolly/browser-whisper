@@ -659,9 +659,18 @@
             <span id="fileName">Choose file</span>
           </label>
           <select id="modelSelect">
-            <option value="whisper-tiny">Tiny (~64 MB)</option>
-            <option value="whisper-base" selected>Base (~136 MB)</option>
-            <option value="whisper-small">Small (~510 MB)</option>
+            <optgroup label="Moonshine (English only)">
+              <option value="moonshine-tiny">Moonshine Tiny (~32 MB)</option>
+              <option value="moonshine-base">Moonshine Base (~61 MB)</option>
+            </optgroup>
+            <optgroup label="Whisper">
+              <option value="whisper-tiny" selected>Whisper Tiny (~40 MB)</option>
+              <option value="whisper-base">Whisper Base (~76 MB)</option>
+              <option value="whisper-small">Whisper Small (~240 MB)</option>
+            </optgroup>
+            <optgroup label="Distil-Whisper (English only)">
+              <option value="distil-whisper-small">Distil Whisper Small (~185 MB)</option>
+            </optgroup>
           </select>
           <button id="transcribeBtn" disabled>Transcribe</button>
         </div>

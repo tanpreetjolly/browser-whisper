@@ -21,11 +21,10 @@ import type {
     MainThreadMessage,
     TranscriptSegment,
     TranscribeProgress,
-    WhisperModel,
+    ASRModel,
     PCMChunk,
     QuantizationType,
 } from '../types.js';
-import { MODEL_IDS } from '../types.js';
 import { BrowserWhisperError } from '../errors.js';
 import { Chunker } from './chunker.js';
 import { downmixToMono, resampleTo16kHz } from './resampler.js';
@@ -93,12 +92,10 @@ export class Bridge {
      */
     async start(
         file: File,
-        model: WhisperModel = 'whisper-base',
+        model: ASRModel = 'whisper-tiny',
         language?: string,
         quantization?: QuantizationType,
     ): Promise<void> {
-        const modelId = MODEL_IDS[model];
-
         // Create MessageChannel for direct decoder→whisper PCM transfer (zero-copy)
         const { port1, port2 } = new MessageChannel();
 
@@ -112,8 +109,8 @@ export class Bridge {
         // Give port2 to whisper (it will receive PCMChunks through it)
         this.whisperWorker.postMessage({ type: 'port', port: port2 }, [port2]);
 
-        // Start Whisper model loading (runs concurrently with decode)
-        this.whisperWorker.postMessage({ type: 'init', modelId, language, quantization });
+        // Start model loading (runs concurrently with decode)
+        this.whisperWorker.postMessage({ type: 'init', model, language, quantization });
 
         // Wait for the model to finish loading before feeding chunks into it
         await this.waitForReady();

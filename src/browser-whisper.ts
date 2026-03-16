@@ -22,7 +22,7 @@ import type {
     TranscriptSegment,
     TranscribeOptions,
     TranscribeProgress,
-    WhisperModel,
+    ASRModel,
 } from './types.js';
 
 // ---------------------------------------------------------------------------
@@ -49,7 +49,7 @@ export class BrowserWhisper {
      * 
      * Internally, this boots up two Web Workers:
      * 1. A Decoder Worker (using WebCodecs/MediaBunny to decode the file)
-     * 2. A Whisper Worker (using Transformers.js/WebGPU to run inference)
+     * 2. An ASR Worker (using Transformers.js/WebGPU to run inference)
      * 
      * The workers communicate with each other via a zero-copy MessageChannel,
      * entirely bypassing the main UI thread to prevent blocking.
@@ -178,7 +178,7 @@ export class TranscribeStream implements AsyncIterable<TranscriptSegment> {
         try {
             await this.bridge.start(
                 this.file,
-                options.model as WhisperModel | undefined ?? 'whisper-base',
+                options.model as ASRModel | undefined ?? 'whisper-tiny',
                 options.language,
                 options.quantization,
             );
