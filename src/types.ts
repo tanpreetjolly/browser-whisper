@@ -2,25 +2,47 @@
 // Model type
 // ---------------------------------------------------------------------------
 
-export type WhisperModel =
+export type ASRModel =
     | 'whisper-tiny'
     | 'whisper-base'
     | 'whisper-small'
-    | 'whisper-large'
     | 'moonshine-tiny'
     | 'moonshine-base'
     | 'distil-whisper-small';
 
-/** Map a friendly model name to its Hugging Face Hub model ID */
-export const MODEL_IDS: Record<WhisperModel, string> = {
-    'whisper-tiny':         'onnx-community/whisper-tiny',
-    'whisper-base':         'onnx-community/whisper-base',
-    'whisper-small':        'onnx-community/whisper-small',
-    'whisper-large':        'onnx-community/whisper-large-v3-turbo',
-    'moonshine-tiny':       'onnx-community/moonshine-tiny-ONNX',
-    'moonshine-base':       'onnx-community/moonshine-base-ONNX',
-    'distil-whisper-small': 'onnx-community/distil-small.en',
+export interface ModelConfig {
+    /** Hugging Face Hub model ID */
+    hfId: string;
+    /** dtype passed to transformers.js when quantization is 'hybrid' */
+    hybridDtype: Record<string, string> | string;
+    /** Whether the model supports return_timestamps / chunk_length_s / stride_length_s */
+    supportsTimestamps: boolean;
+    /** Whether the model supports the language parameter */
+    supportsLanguage: boolean;
+}
+
+const WHISPER_HYBRID = { encoder_model: 'fp32', decoder_model_merged: 'q4' };
+
+export const MODELS: Record<ASRModel, ModelConfig> = {
+    'whisper-tiny':         { hfId: 'onnx-community/whisper-tiny',         hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
+    'whisper-base':         { hfId: 'onnx-community/whisper-base',         hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
+    'whisper-small':        { hfId: 'onnx-community/whisper-small',        hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
+    'moonshine-tiny':       { hfId: 'onnx-community/moonshine-tiny-ONNX', hybridDtype: 'q4',           supportsTimestamps: false, supportsLanguage: false },
+    'moonshine-base':       { hfId: 'onnx-community/moonshine-base-ONNX', hybridDtype: 'q4',           supportsTimestamps: false, supportsLanguage: false },
+    'distil-whisper-small': { hfId: 'onnx-community/distil-small.en',     hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: false },
 };
+
+/**
+ * @deprecated Renamed to {@link ASRModel} to reflect support for non-Whisper models (Moonshine, Distil-Whisper).
+ * `WhisperModel` will be removed in a future major version. Update your imports:
+ * ```ts
+ * // before
+ * import type { WhisperModel } from 'browser-whisper';
+ * // after
+ * import type { ASRModel } from 'browser-whisper';
+ * ```
+ */
+export type WhisperModel = ASRModel;
 
 export type QuantizationType = 'fp32' | 'fp16' | 'q8' | 'q4' | 'hybrid';
 
@@ -66,8 +88,8 @@ export interface TranscribeProgress {
 
 /** Options passed to `Transcriber.transcribe()` */
 export interface TranscribeOptions {
-    /** Model to use for transcription (default: 'whisper-base') */
-    model?: WhisperModel;
+    /** Model to use for transcription (default: 'whisper-tiny') */
+    model?: ASRModel;
     /** Model precision format affecting speed vs accuracy (default: 'hybrid') */
     quantization?: QuantizationType;
     /** BCP-47 language code, e.g. 'en' or 'fr' (default: auto-detect) */
@@ -101,9 +123,9 @@ export type DecoderMessage =
     | { type: 'init'; file: File }
     | { type: 'port'; port: MessagePort };
 
-// — Messages sent TO the whisper worker (via self.postMessage) —
-export type WhisperMessage =
-    | { type: 'init'; modelId: string; language?: string; quantization?: QuantizationType }
+// — Messages sent TO the ASR worker (via self.postMessage) —
+export type ASRWorkerMessage =
+    | { type: 'init'; model: ASRModel; language?: string; quantization?: QuantizationType }
     | { type: 'port'; port: MessagePort };
 
 // — Messages sent FROM workers TO the main thread —

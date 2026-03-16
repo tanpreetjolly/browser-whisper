@@ -5,11 +5,14 @@ export { BrowserWhisper, TranscribeStream } from './browser-whisper.js';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 export type {
-    WhisperModel,
+    ASRModel,
+    WhisperModel, // @deprecated — use ASRModel
+    ModelConfig,
     TranscriptSegment,
     TranscribeOptions,
     TranscribeProgress,
 } from './types.js';
+export { MODELS } from './types.js';
 
 // ── Error classes ────────────────────────────────────────────────────────────
 export {
