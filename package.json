@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "@huggingface/transformers": "^3.8.1",
+    "@vercel/analytics": "^2.0.1",
     "mediabunny": "^1.35.1"
   },
   "devDependencies": {

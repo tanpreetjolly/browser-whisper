@@ -598,6 +598,11 @@
     </section>
   </div>
 
+  <script type="module">
+    import { inject } from '@vercel/analytics';
+    inject();
+  </script>
+
   <script>
     const tabs = document.querySelectorAll('.pkg-manager');
     const codeEl = document.getElementById('cmdCode');
