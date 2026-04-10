@@ -710,7 +710,10 @@
   </div>
 
   <script type="module">
+    import { inject } from '@vercel/analytics';
     import { BrowserWhisper } from '/src/index.ts';
+    
+    inject();
 
     const $ = id => document.getElementById(id);
     const fileInput = $('fileInput'), fileLabel = $('fileLabel'), fileName = $('fileName'),
