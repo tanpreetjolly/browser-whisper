@@ -104,15 +104,25 @@ self.onmessage = async (e: MessageEvent) => {
                             device,
                             dtype,
                             progress_callback: (progressInfo: any) => {
-                                // If status is not 'download', it's just initiating or ready, skip progress modification
-                                if (progressInfo.status !== 'download') return;
+                                const { status, file, loaded, total } = progressInfo;
 
-                                if (progressInfo.file && progressInfo.total) {
-                                    downloadCache.set(progressInfo.file, {
-                                        loaded: progressInfo.loaded || 0,
-                                        total: progressInfo.total,
+                                // 'initiate' fires first with the file's total size
+                                if (status === 'initiate' && file && total) {
+                                    downloadCache.set(file, { loaded: 0, total });
+                                    return;
+                                }
+
+                                // 'progress' fires repeatedly with updated loaded bytes
+                                if (status === 'progress' && file) {
+                                    const prev = downloadCache.get(file);
+                                    downloadCache.set(file, {
+                                        loaded: loaded || 0,
+                                        total: total || prev?.total || 0,
                                     });
                                 }
+
+                                // Skip all other statuses ('done', 'ready', etc.)
+                                if (status !== 'progress' && status !== 'initiate') return;
 
                                 let totalLoaded = 0;
                                 let totalExpected = 0;

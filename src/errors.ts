@@ -29,7 +29,7 @@ export class CodecNotSupportedError extends BrowserWhisperError {
 export class ModelLoadError extends BrowserWhisperError {
     constructor(modelId: string, cause?: unknown) {
         super(
-            `Failed to load Whisper model "${modelId}". ` +
+            `Failed to load model "${modelId}". ` +
             (cause instanceof Error ? cause.message : String(cause ?? '')),
         );
         this.name = 'ModelLoadError';

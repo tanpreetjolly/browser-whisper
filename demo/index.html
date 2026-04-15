@@ -359,6 +359,42 @@
       font-size: 0.8rem;
     }
 
+    /* ── Download Progress Bar ───────────────────────────── */
+    .progress-wrap {
+      height: 0;
+      overflow: hidden;
+      transition: height 0.25s ease;
+    }
+
+    .progress-wrap.visible {
+      height: 20px;
+    }
+
+    .progress-bar-track {
+      background: var(--gray-100);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+      margin-top: 2px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--fg);
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-label {
+      font-size: 0.7rem;
+      color: var(--gray-400);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      margin-top: 3px;
+      text-align: right;
+    }
+
     /* ── Media Player ────────────────────────────────────── */
     .media-container {
       width: 100%;
@@ -633,7 +669,7 @@
     <header>
       <div class="title-row">
         <h1>browser-whisper</h1>
-        <span class="version">v1.0.0</span>
+        <span class="version">v1.1.0</span>
       </div>
       <a href="/" class="back" rel="author">Back to pkg</a>
     </header>
@@ -675,6 +711,12 @@
           <button id="transcribeBtn" disabled>Transcribe</button>
         </div>
         <div class="status" id="statusLog" role="status" aria-live="polite">Ready — select an audio or video file to begin.</div>
+        <div class="progress-wrap" id="progressWrap" aria-hidden="true">
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progressFill"></div>
+          </div>
+          <div class="progress-label" id="progressLabel"></div>
+        </div>
       </section>
 
       <!-- Media Player -->
@@ -721,7 +763,21 @@
       statusLog = $('statusLog'), mediaContainer = $('mediaContainer'),
       transcriptBox = $('transcriptBox'), resultsCard = $('resultsCard'),
       jsonBox = $('jsonBox'), copyBtn = $('copyBtn'), notice = $('notice'),
-      dismissNotice = $('dismissNotice');
+      dismissNotice = $('dismissNotice'),
+      progressWrap = $('progressWrap'), progressFill = $('progressFill'), progressLabel = $('progressLabel');
+
+    function setProgress(fraction) {
+      const pct = Math.round(fraction * 100);
+      progressFill.style.width = pct + '%';
+      progressLabel.textContent = pct + '%';
+    }
+
+    function showProgress() { progressWrap.classList.add('visible'); }
+    function hideProgress() {
+      progressWrap.classList.remove('visible');
+      progressFill.style.width = '0%';
+      progressLabel.textContent = '';
+    }
 
     let file = null;
     let mediaEl = null;
@@ -802,11 +858,17 @@
             const pct = Math.round(progress * 100);
             if (stage === 'loading') {
               if (progress === 1) {
-                statusLog.textContent = 'WebGPU model cached and ready.';
+                statusLog.textContent = 'Model ready.';
+                hideProgress();
               } else {
-                statusLog.textContent = 'Downloading model… (first run only)';
+                showProgress();
+                setProgress(progress);
+                statusLog.textContent = progress === 0
+                  ? 'Downloading model…'
+                  : `Downloading model… ${pct}%`;
               }
             } else if (stage === 'decoding') {
+              hideProgress();
               statusLog.textContent = `Decoding audio… ${pct}%`;
             } else if (stage === 'transcribing') {
               statusLog.textContent = 'Transcribing…';

@@ -24,12 +24,12 @@ export interface ModelConfig {
 const WHISPER_HYBRID = { encoder_model: 'fp32', decoder_model_merged: 'q4' };
 
 export const MODELS: Record<ASRModel, ModelConfig> = {
-    'whisper-tiny':         { hfId: 'onnx-community/whisper-tiny',         hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'whisper-base':         { hfId: 'onnx-community/whisper-base',         hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'whisper-small':        { hfId: 'onnx-community/whisper-small',        hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'moonshine-tiny':       { hfId: 'onnx-community/moonshine-tiny-ONNX', hybridDtype: 'q4',           supportsTimestamps: false, supportsLanguage: false },
-    'moonshine-base':       { hfId: 'onnx-community/moonshine-base-ONNX', hybridDtype: 'q4',           supportsTimestamps: false, supportsLanguage: false },
-    'distil-whisper-small': { hfId: 'onnx-community/distil-small.en',     hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: false },
+    'whisper-tiny':         { hfId: 'onnx-community/whisper-tiny',              hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
+    'whisper-base':         { hfId: 'onnx-community/whisper-base',              hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
+    'whisper-small':        { hfId: 'onnx-community/whisper-small',             hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
+    'moonshine-tiny':       { hfId: 'onnx-community/moonshine-tiny-ONNX',      hybridDtype: 'q4',           supportsTimestamps: false, supportsLanguage: false },
+    'moonshine-base':       { hfId: 'onnx-community/moonshine-base-ONNX',      hybridDtype: 'q4',           supportsTimestamps: false, supportsLanguage: false },
+    'distil-whisper-small': { hfId: 'onnx-community/distil-small.en',          hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: false },
 };
 
 /**
