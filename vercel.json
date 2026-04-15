@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/demo/(.*)",
       "headers": [
         {
           "key": "Cross-Origin-Embedder-Policy",
@@ -10,7 +10,12 @@
         {
           "key": "Cross-Origin-Opener-Policy",
           "value": "same-origin"
-        },
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
         {
           "key": "X-Content-Type-Options",
           "value": "nosniff"
