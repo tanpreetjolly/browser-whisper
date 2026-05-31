@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live VAD + Whisper — browser-whisper</title>
+  <meta name="description" content="Live microphone transcription with voice-activity detection using browser-whisper and vad-web." />
+  <link rel="canonical" href="https://whisper.tanpreet.xyz/examples/live-vad/" />
+  <link rel="icon" href="/8134.ico" type="image/x-icon" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../shared.css" />
+  <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/ort.wasm.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.30/dist/bundle.min.js"></script>
+  <style>
+    .site-header .title-row { width: 100%; justify-content: space-between; }
+    select { max-width: min(100%, 320px); }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="title-row">
+        <div style="display:flex;align-items:center;gap:0.65rem;flex-wrap:wrap">
+          <h1>Live VAD + Whisper</h1>
+          <span class="badge">Example</span>
+        </div>
+        <div id="status" class="status-pill" role="status" aria-live="polite">idle</div>
+      </div>
+      <nav class="header-links" aria-label="Site navigation">
+        <a href="/examples/" class="back">All examples</a>
+        <a href="/">Pkg</a>
+        <a href="/docs/">Docs</a>
+        <a href="/demo/">Demo</a>
+      </nav>
+    </header>
+
+    <p class="lead">
+      Prepare a model, then start listening. Speech segments are detected with VAD and sent to Whisper as you talk.
+    </p>
+
+    <section class="card" aria-label="Controls">
+      <h2>Controls</h2>
+      <div class="toolbar">
+        <select id="model" aria-label="Model">
+          <optgroup label="Moonshine (English only)">
+            <option value="moonshine-tiny">Moonshine Tiny (~56 MB)</option>
+            <option value="moonshine-base">Moonshine Base (~97 MB)</option>
+          </optgroup>
+          <optgroup label="Whisper">
+            <option value="whisper-tiny">Whisper Tiny (~118 MB)</option>
+            <option value="whisper-base" selected>Whisper Base (~201 MB)</option>
+            <option value="whisper-small">Whisper Small (~563 MB)</option>
+          </optgroup>
+          <optgroup label="Whisper (timestamped)">
+            <option value="whisper-tiny_timestamped">Whisper Tiny Timestamped</option>
+            <option value="whisper-base_timestamped">Whisper Base Timestamped</option>
+            <option value="whisper-small_timestamped">Whisper Small Timestamped</option>
+          </optgroup>
+          <optgroup label="Whisper Large">
+            <option value="lite-whisper-large-v3-turbo-fast">Lite Large V3 Turbo Fast (~1.49 GB)</option>
+            <option value="lite-whisper-large-v3-turbo">Lite Large V3 Turbo (~1.72 GB)</option>
+            <option value="lite-whisper-large-v3-turbo-acc">Lite Large V3 Turbo Acc (~1.89 GB)</option>
+            <option value="whisper-large-v3-turbo">Whisper Large V3 Turbo (~2.69 GB)</option>
+            <option value="whisper-large-v3-turbo_timestamped">Whisper Large V3 Turbo Timestamped</option>
+            <option value="whisper-large-v3">Whisper Large V3 (~3.12 GB)</option>
+          </optgroup>
+          <optgroup label="Distil-Whisper (English only)">
+            <option value="distil-whisper-small">Distil Whisper Small (~517 MB)</option>
+          </optgroup>
+        </select>
+        <button type="button" id="prepare">Prepare</button>
+        <button type="button" id="start" class="secondary">Start</button>
+        <button type="button" id="stop" class="secondary" disabled>Stop</button>
+        <button type="button" id="clear" class="secondary">Clear</button>
+      </div>
+    </section>
+
+    <div class="grid-2">
+      <section class="panel">
+        <h3>Transcript</h3>
+        <div id="transcript" class="transcript" aria-live="polite"></div>
+      </section>
+      <section class="panel">
+        <h3>Events</h3>
+        <pre id="events" class="log-panel"></pre>
+      </section>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>

@@ -1,17 +1,26 @@
 import { BrowserWhisper, type ASRModel, type TranscribeProgress } from '../../../src/index.js';
 
 const modelSelect = document.querySelector<HTMLSelectElement>('#model');
+const fileInput = document.querySelector<HTMLInputElement>('#fileInput');
+const fileLabel = document.querySelector<HTMLLabelElement>('#fileLabel');
+const fileNameElement = document.querySelector<HTMLSpanElement>('#fileName');
 const downloadButton = document.querySelector<HTMLButtonElement>('#download');
 const transcribeButton = document.querySelector<HTMLButtonElement>('#transcribe');
 const repeatButton = document.querySelector<HTMLButtonElement>('#repeat');
 const logElement = document.querySelector<HTMLPreElement>('#log');
 const segmentsElement = document.querySelector<HTMLDivElement>('#segments');
 
-if (!modelSelect || !downloadButton || !transcribeButton || !repeatButton || !logElement || !segmentsElement) {
+if (
+    !modelSelect || !fileInput || !fileLabel || !fileNameElement ||
+    !downloadButton || !transcribeButton || !repeatButton || !logElement || !segmentsElement
+) {
     throw new Error('MP3 transcribe UI failed to initialize.');
 }
 
 let whisper = createWhisper();
+let selectedFile: File | null = null;
+let hasDefaultAudio = false;
+let isBusy = false;
 
 function selectedModel(): ASRModel {
     return modelSelect.value as ASRModel;
@@ -34,17 +43,51 @@ function renderProgress(prefix: string, event: TranscribeProgress): void {
     appendLog(`${prefix}: ${event.stage} ${Math.round(event.progress * 100)}%`);
 }
 
-function setBusy(isBusy: boolean): void {
-    downloadButton.disabled = isBusy;
-    transcribeButton.disabled = isBusy;
-    repeatButton.disabled = isBusy;
-    modelSelect.disabled = isBusy;
+function updateFileUi(): void {
+    if (selectedFile) {
+        fileNameElement.textContent = selectedFile.name;
+        fileLabel.classList.add('has-file');
+    } else {
+        fileNameElement.textContent = hasDefaultAudio ? 'audio.mp3 (default)' : 'Choose audio';
+        fileLabel.classList.remove('has-file');
+    }
+    updateTranscribeButton();
 }
 
-async function createAudioFile(): Promise<File> {
+function updateTranscribeButton(): void {
+    transcribeButton.disabled = isBusy || (!selectedFile && !hasDefaultAudio);
+}
+
+function setBusy(busy: boolean): void {
+    isBusy = busy;
+    downloadButton.disabled = busy;
+    repeatButton.disabled = busy;
+    modelSelect.disabled = busy;
+    fileInput.disabled = busy;
+    updateTranscribeButton();
+}
+
+async function probeDefaultAudio(): Promise<void> {
+    try {
+        const response = await fetch('/audio.mp3', { method: 'HEAD' });
+        hasDefaultAudio = response.ok;
+        if (hasDefaultAudio) {
+            appendLog('found default /audio.mp3');
+        }
+    } catch {
+        hasDefaultAudio = false;
+    }
+    updateFileUi();
+}
+
+async function resolveAudioFile(): Promise<File> {
+    if (selectedFile) {
+        return selectedFile;
+    }
+
     const response = await fetch('/audio.mp3');
     if (!response.ok) {
-        throw new Error(`Failed to fetch /audio.mp3: ${response.status}`);
+        throw new Error('No audio selected and /audio.mp3 is not available. Choose a file or add public/audio.mp3.');
     }
 
     const blob = await response.blob();
@@ -83,8 +126,8 @@ transcribeButton.addEventListener('click', async () => {
     segmentsElement.textContent = '';
 
     try {
-        appendLog(`transcribe: fetching audio.mp3`);
-        const file = await createAudioFile();
+        appendLog('transcribe: resolving audio');
+        const file = await resolveAudioFile();
         appendLog(`transcribe: starting ${file.name} (${file.size} bytes)`);
 
         for await (const segment of whisper.transcribe(file, {
@@ -94,7 +137,7 @@ transcribeButton.addEventListener('click', async () => {
             const timestamp = document.createElement('span');
             row.className = 'segment';
             timestamp.className = 'time';
-            timestamp.textContent = `${segment.start.toFixed(1)}-${segment.end.toFixed(1)}s`;
+            timestamp.textContent = `${segment.start.toFixed(1)}–${segment.end.toFixed(1)}s`;
             row.append(timestamp, ` ${segment.text}`);
             segmentsElement.append(row);
         }
@@ -107,6 +150,12 @@ transcribeButton.addEventListener('click', async () => {
     }
 });
 
+fileInput.addEventListener('change', () => {
+    selectedFile = fileInput.files?.[0] ?? null;
+    updateFileUi();
+    appendLog(selectedFile ? `file: ${selectedFile.name}` : 'file: cleared');
+});
+
 modelSelect.addEventListener('change', () => {
     whisper.dispose();
     whisper = createWhisper();
@@ -117,4 +166,5 @@ window.addEventListener('beforeunload', () => {
     whisper.dispose();
 });
 
+void probeDefaultAudio();
 appendLog('ready');

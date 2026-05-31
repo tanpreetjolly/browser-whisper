@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examples — browser-whisper</title>
+  <meta name="description" content="Mini examples for browser-whisper: live microphone transcription with VAD and file-based MP3 transcription." />
+  <link rel="canonical" href="https://whisper.tanpreet.xyz/examples/" />
+  <link rel="icon" href="/8134.ico" type="image/x-icon" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./shared.css" />
+  <style>
+    .page { max-width: 640px; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="site-header">
+      <div class="title-row">
+        <h1>Examples</h1>
+      </div>
+      <nav class="header-links" aria-label="Site navigation">
+        <a href="/" class="back">Back to pkg</a>
+        <a href="/docs/">Docs</a>
+        <a href="/demo/">Live demo</a>
+      </nav>
+    </header>
+
+    <p class="lead">
+      Small, focused demos that show how to use browser-whisper in real flows.
+      Each runs entirely in your browser (WebGPU + COOP/COEP required).
+    </p>
+
+    <div class="examples-grid">
+      <a class="example-card" href="/examples/live-vad/">
+        <h2>Live VAD + Whisper</h2>
+        <p>Microphone capture with voice-activity detection; transcribes each utterance as you speak.</p>
+        <span class="tag">Requires mic permission · uses @ricky0123/vad-web</span>
+      </a>
+      <a class="example-card" href="/examples/mp3/">
+        <h2>MP3 transcribe</h2>
+        <p>Download a model, then transcribe an audio file with segment timestamps and progress logs.</p>
+        <span class="tag">Pick a file or serve <code>public/audio.mp3</code></span>
+      </a>
+    </div>
+  </div>
+</body>
+</html>
