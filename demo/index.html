@@ -637,6 +637,39 @@
       border-radius: 0 6px 6px 0;
     }
 
+    .transcript-words {
+      line-height: 1.85;
+    }
+
+    .word {
+      cursor: pointer;
+      border-radius: 3px;
+      padding: 0.08em 0.12em;
+      margin: 0 -0.04em;
+      transition: background 0.12s, color 0.12s;
+    }
+
+    .word:hover {
+      background: var(--gray-100);
+      color: var(--fg);
+    }
+
+    .word.active {
+      background: var(--fg);
+      color: var(--bg);
+    }
+
+    .timestamp-hint {
+      font-size: 0.8rem;
+      color: var(--gray-500);
+      margin: -0.5rem 0 0;
+      min-height: 1.2em;
+    }
+
+    .timestamp-hint.visible {
+      color: var(--gray-800);
+    }
+
     .json-output {
       max-height: 350px;
       overflow-y: auto;
@@ -818,7 +851,19 @@
       transcriptBox = $('transcriptBox'), resultsCard = $('resultsCard'),
       jsonBox = $('jsonBox'), copyBtn = $('copyBtn'), notice = $('notice'),
       dismissNotice = $('dismissNotice'),
-      progressWrap = $('progressWrap'), progressFill = $('progressFill'), progressLabel = $('progressLabel');
+      progressWrap = $('progressWrap'), progressFill = $('progressFill'), progressLabel = $('progressLabel'),
+      timestampHint = $('timestampHint');
+
+    const isWordTimestampModel = (id) => id.includes('_timestamped');
+
+    function updateTimestampHint() {
+      const on = isWordTimestampModel(modelSelect.value);
+      timestampHint.hidden = !on;
+      timestampHint.classList.toggle('visible', on);
+    }
+
+    modelSelect.addEventListener('change', updateTimestampHint);
+    updateTimestampHint();
 
     function setProgress(fraction) {
       const pct = Math.round(fraction * 100);
@@ -837,6 +882,7 @@
     let mediaEl = null;
     let segments = [];
     let rawSegments = [];
+    let wordSpans = [];
 
     // format seconds to M:SS
     const fmt = s => { if (!isFinite(s)) return '0:00'; const m = Math.floor(s / 60); return `${m}:${Math.floor(s % 60).toString().padStart(2, '0')}`; };
@@ -879,6 +925,7 @@
       jsonBox.textContent = '';
       segments = [];
       rawSegments = [];
+      wordSpans = [];
 
       // Show results card with empty state
       resultsCard.classList.add('visible');
@@ -896,10 +943,57 @@
       // Sync visual highlights with native player timeupdate
       mediaEl.addEventListener('timeupdate', () => {
         const t = mediaEl.currentTime;
+        let activeWord = false;
+        wordSpans.forEach(({ start, end, el }) => {
+          const on = t >= start && t < end + 0.05;
+          el.classList.toggle('active', on);
+          if (on) activeWord = true;
+        });
         segments.forEach(seg => {
-          seg.el.classList.toggle('active', t >= seg.start && t <= seg.end + 0.5);
+          seg.el.classList.toggle('active', !activeWord && t >= seg.start && t <= seg.end + 0.5);
         });
       });
+
+      function appendSegment({ text, start, end, words }) {
+        const div = document.createElement('div');
+        div.className = 'transcript-item';
+
+        const time = document.createElement('span');
+        time.className = 'time';
+        time.textContent = `[${fmt(start)}]`;
+        div.appendChild(time);
+
+        if (words?.length) {
+          const body = document.createElement('span');
+          body.className = 'transcript-words';
+          words.forEach((word, index) => {
+            const span = document.createElement('span');
+            span.className = 'word';
+            span.textContent = word.text + (index < words.length - 1 ? ' ' : '');
+            span.addEventListener('click', (event) => {
+              event.stopPropagation();
+              mediaEl.currentTime = word.start;
+              void mediaEl.play();
+            });
+            body.appendChild(span);
+            wordSpans.push({ start: word.start, end: word.end, el: span });
+          });
+          div.appendChild(body);
+        } else {
+          const body = document.createElement('span');
+          body.textContent = text;
+          div.appendChild(body);
+        }
+
+        div.addEventListener('click', () => {
+          mediaEl.currentTime = start;
+          void mediaEl.play();
+        });
+
+        segments.push({ start, end, el: div });
+        transcriptBox.appendChild(div);
+        transcriptBox.scrollTop = transcriptBox.scrollHeight;
+      }
 
       const model = modelSelect.value;
       const whisper = new BrowserWhisper({ model });
@@ -932,30 +1026,26 @@
           }
         });
 
-        for await (const { text, start, end } of stream) {
+        for await (const segment of stream) {
           iterCount++;
+          const { text, start, end, words } = segment;
           const cleanText = text.trim();
-          rawSegments.push({ text: cleanText, start, end });
+          const entry = {
+            text: cleanText,
+            start,
+            end,
+            ...(words?.length ? { words } : {}),
+          };
+          rawSegments.push(entry);
 
-          // Clear empty state on first segment
           if (iterCount === 1) transcriptBox.innerHTML = '';
-
-          const div = document.createElement('div');
-          div.className = 'transcript-item';
-          div.innerHTML = `<span class="time">[${fmt(start)}]</span> <span>${cleanText}</span>`;
-
-          // Click to seek native player
-          div.addEventListener('click', () => {
-            mediaEl.currentTime = start;
-            mediaEl.play();
-          });
-
-          segments.push({ start, end, el: div });
-          transcriptBox.appendChild(div);
-          transcriptBox.scrollTop = transcriptBox.scrollHeight;
+          appendSegment(entry);
         }
 
-        statusLog.textContent = `Done — ${iterCount} segments transcribed.`;
+        const wordCount = rawSegments.reduce((n, s) => n + (s.words?.length ?? 0), 0);
+        statusLog.textContent = wordCount > 0
+          ? `Done — ${iterCount} segments, ${wordCount} words.`
+          : `Done — ${iterCount} segments transcribed.`;
         jsonBox.textContent = JSON.stringify(rawSegments, null, 2);
 
       } catch (err) {
