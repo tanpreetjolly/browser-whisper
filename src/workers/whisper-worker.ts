@@ -18,8 +18,10 @@ import type {
     QuantizationType,
 } from '../types.js';
 import { MODELS } from '../types.js';
+import type { TranscriptSegment } from '../types.js';
 import { ModelLoadError } from '../errors.js';
 import { createOPFSCache } from '../lib/opfs-cache.js';
+import { chunksToWords, groupWordsIntoSegments, type TimestampChunk } from '../lib/word-segments.js';
 
 // ---------------------------------------------------------------------------
 // transformers.js environment setup
@@ -233,34 +235,47 @@ async function transcribeChunk(chunk: PCMChunk): Promise<void> {
 
     postMain({ type: 'progress', event: { stage: 'transcribing', progress: 0 } });
 
+    const returnTimestamps = config.supportsWordTimestamps
+        ? 'word'
+        : config.supportsTimestamps
+            ? true
+            : undefined;
+
     const result = await asrPipeline(chunk.samples, {
         sampling_rate: 16_000,
-        ...(config.supportsTimestamps && {
-            // Segment-level timestamps (word-level requires models exported with
-            // output_attentions=True, which onnx-community models don't have)
-            return_timestamps: true,
+        ...(returnTimestamps !== undefined && {
+            return_timestamps: returnTimestamps,
             chunk_length_s: 30,
             stride_length_s: 5,
         }),
         ...(config.supportsLanguage && language ? { language } : {}),
     });
 
-    // The pipeline returns { text, chunks?: Array<{text, timestamp: [start, end]}> }
     const output = result as {
         text: string;
-        chunks?: Array<{ text: string; timestamp: [number | null, number | null] }>;
+        chunks?: TimestampChunk[];
     };
 
-    // Models without timestamp support return no chunks — emit a single segment spanning the whole chunk
-    const segments = output.chunks
-        ? output.chunks.map((c) => ({
-            text: c.text,
+    let segments: TranscriptSegment[];
+
+    if (config.supportsWordTimestamps && output.chunks?.length) {
+        const words = chunksToWords(output.chunks, chunk.timestamp);
+        segments = groupWordsIntoSegments(words);
+    } else if (output.chunks?.length) {
+        segments = output.chunks.map((c) => ({
+            text: c.text.trim(),
             start: (c.timestamp[0] ?? 0) + chunk.timestamp,
             end: (c.timestamp[1] ?? 0) + chunk.timestamp,
-        }))
-        : output.text.trim()
-            ? [{ text: output.text, start: chunk.timestamp, end: chunk.timestamp + chunk.samples.length / 16_000 }]
-            : [];
+        })).filter((s) => s.text.length > 0);
+    } else if (output.text.trim()) {
+        segments = [{
+            text: output.text.trim(),
+            start: chunk.timestamp,
+            end: chunk.timestamp + chunk.samples.length / 16_000,
+        }];
+    } else {
+        segments = [];
+    }
 
     for (const segment of segments) {
         postMain({ type: 'segment', segment });

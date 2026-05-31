@@ -26,28 +26,34 @@ export interface ModelConfig {
     hybridDtype: Record<string, string> | string;
     /** Whether the model supports return_timestamps / chunk_length_s / stride_length_s */
     supportsTimestamps: boolean;
+    /** Whether the model supports `return_timestamps: 'word'` (DTW word alignment) */
+    supportsWordTimestamps: boolean;
     /** Whether the model supports the language parameter */
     supportsLanguage: boolean;
 }
 
 const WHISPER_HYBRID = { encoder_model: 'fp32', decoder_model_merged: 'q4' };
 
+const SEGMENT_TS = { supportsTimestamps: true, supportsWordTimestamps: false };
+const WORD_TS = { supportsTimestamps: true, supportsWordTimestamps: true };
+const NO_TS = { supportsTimestamps: false, supportsWordTimestamps: false };
+
 export const MODELS: Record<ASRModel, ModelConfig> = {
-    'whisper-tiny':                         { hfId: 'onnx-community/whisper-tiny',                              hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'whisper-base':                         { hfId: 'onnx-community/whisper-base',                              hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'whisper-small':                        { hfId: 'onnx-community/whisper-small',                             hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'whisper-tiny_timestamped':             { hfId: 'onnx-community/whisper-tiny_timestamped',                  hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'whisper-base_timestamped':             { hfId: 'onnx-community/whisper-base_timestamped',                  hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'whisper-small_timestamped':            { hfId: 'onnx-community/whisper-small_timestamped',                 hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'whisper-large-v3-turbo':               { hfId: 'onnx-community/whisper-large-v3-turbo',                    hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'whisper-large-v3-turbo_timestamped':   { hfId: 'onnx-community/whisper-large-v3-turbo_timestamped',        hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'whisper-large-v3':                     { hfId: 'onnx-community/whisper-large-v3-ONNX',                     hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'lite-whisper-large-v3-turbo-fast':     { hfId: 'onnx-community/lite-whisper-large-v3-turbo-fast-ONNX',     hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'lite-whisper-large-v3-turbo':          { hfId: 'onnx-community/lite-whisper-large-v3-turbo-ONNX',          hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'lite-whisper-large-v3-turbo-acc':      { hfId: 'onnx-community/lite-whisper-large-v3-turbo-acc-ONNX',      hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: true  },
-    'moonshine-tiny':                       { hfId: 'onnx-community/moonshine-tiny-ONNX',                       hybridDtype: 'q4',           supportsTimestamps: false, supportsLanguage: false },
-    'moonshine-base':                       { hfId: 'onnx-community/moonshine-base-ONNX',                       hybridDtype: 'q4',           supportsTimestamps: false, supportsLanguage: false },
-    'distil-whisper-small':                 { hfId: 'onnx-community/distil-small.en',                           hybridDtype: WHISPER_HYBRID, supportsTimestamps: true,  supportsLanguage: false },
+    'whisper-tiny':                         { hfId: 'onnx-community/whisper-tiny',                              hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'whisper-base':                         { hfId: 'onnx-community/whisper-base',                              hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'whisper-small':                        { hfId: 'onnx-community/whisper-small',                             hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'whisper-tiny_timestamped':             { hfId: 'onnx-community/whisper-tiny_timestamped',                  hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
+    'whisper-base_timestamped':             { hfId: 'onnx-community/whisper-base_timestamped',                  hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
+    'whisper-small_timestamped':            { hfId: 'onnx-community/whisper-small_timestamped',                 hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
+    'whisper-large-v3-turbo':               { hfId: 'onnx-community/whisper-large-v3-turbo',                    hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'whisper-large-v3-turbo_timestamped':   { hfId: 'onnx-community/whisper-large-v3-turbo_timestamped',        hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
+    'whisper-large-v3':                     { hfId: 'onnx-community/whisper-large-v3-ONNX',                     hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'lite-whisper-large-v3-turbo-fast':     { hfId: 'onnx-community/lite-whisper-large-v3-turbo-fast-ONNX',     hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'lite-whisper-large-v3-turbo':          { hfId: 'onnx-community/lite-whisper-large-v3-turbo-ONNX',          hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'lite-whisper-large-v3-turbo-acc':      { hfId: 'onnx-community/lite-whisper-large-v3-turbo-acc-ONNX',      hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'moonshine-tiny':                       { hfId: 'onnx-community/moonshine-tiny-ONNX',                       hybridDtype: 'q4',           ...NO_TS,     supportsLanguage: false },
+    'moonshine-base':                       { hfId: 'onnx-community/moonshine-base-ONNX',                       hybridDtype: 'q4',           ...NO_TS,     supportsLanguage: false },
+    'distil-whisper-small':                 { hfId: 'onnx-community/distil-small.en',                           hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: false },
 };
 
 /**
@@ -68,10 +74,7 @@ export type QuantizationType = 'fp32' | 'fp16' | 'q8' | 'q4' | 'hybrid';
 // Public API types
 // ---------------------------------------------------------------------------
 
-/**
- * A single word with its precise timestamp.
- * @experimental Not currently produced — reserved for future word-level timestamp support.
- */
+/** A single word with start/end times relative to the file */
 export interface WordTimestamp {
     text: string;
     /** Start time in seconds, relative to the beginning of the file */
@@ -87,10 +90,7 @@ export interface TranscriptSegment {
     start: number;
     /** End time in seconds, relative to the beginning of the file */
     end: number;
-    /**
-     * Per-word timestamps (available when using word-level timestamps).
-     * @experimental Not currently populated — reserved for future support.
-     */
+    /** Per-word timestamps when using a `*_timestamped` model */
     words?: WordTimestamp[];
 }
 
