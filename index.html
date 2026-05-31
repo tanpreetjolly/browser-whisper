@@ -336,6 +336,114 @@
       content: "→";
     }
 
+    /* ── Demos hub (homepage) ───────────────────────────── */
+    .demos-section {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 2.5rem;
+      text-align: left;
+    }
+
+    .demos-section .section-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--gray-400);
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .demos-panel {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: stretch;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      box-shadow: 0 1px 2px var(--ring);
+      overflow: hidden;
+    }
+
+    .demos-divider {
+      width: 1px;
+      background: var(--border);
+      margin: 1rem 0;
+    }
+
+    .demo-tile {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      padding: 1.25rem 1.35rem;
+      text-decoration: none;
+      color: inherit;
+      background: var(--bg);
+      min-width: 0;
+      transition: background 0.15s ease;
+    }
+
+    .demo-tile:hover,
+    .demo-tile:focus-visible {
+      background: var(--gray-50);
+      color: inherit;
+      outline: none;
+    }
+
+    .demo-tile-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .demo-tile-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--fg);
+      transition: color 0.15s ease;
+    }
+
+    .demo-tile-arrow {
+      flex-shrink: 0;
+      font-size: 0.85rem;
+      color: var(--gray-400);
+      transition: transform 0.15s ease, color 0.15s ease;
+    }
+
+    .demo-tile:hover .demo-tile-arrow,
+    .demo-tile:focus-visible .demo-tile-arrow {
+      transform: translateX(2px);
+      color: var(--fg);
+    }
+
+    .demo-tile:hover .demo-tile-label,
+    .demo-tile:focus-visible .demo-tile-label {
+      color: var(--fg);
+    }
+
+    .demo-tile p {
+      margin: 0;
+      font-size: 0.8rem;
+      line-height: 1.55;
+      color: var(--gray-500);
+      transition: color 0.15s ease;
+    }
+
+    @media (max-width: 520px) {
+      .demos-panel {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+      }
+
+      .demos-divider {
+        width: auto;
+        height: 1px;
+        margin: 0 1rem;
+      }
+    }
+
     /* ── Models Table ────────────────────────────────────── */
     .models-section {
       display: flex;
@@ -516,12 +624,33 @@
 }</code></pre>
       </div>
       </section>
+
+      <section class="demos-section" aria-label="Interactive demos">
+        <p class="section-label">Try it in the browser</p>
+        <div class="demos-panel">
+          <a href="/demo/" class="demo-tile">
+            <span class="demo-tile-head">
+              <span class="demo-tile-label">Live demo</span>
+              <span class="demo-tile-arrow" aria-hidden="true">→</span>
+            </span>
+            <p>Upload audio or video and transcribe in one step.</p>
+          </a>
+          <div class="demos-divider" aria-hidden="true"></div>
+          <a href="/examples/" class="demo-tile">
+            <span class="demo-tile-head">
+              <span class="demo-tile-label">All demos</span>
+              <span class="demo-tile-arrow" aria-hidden="true">→</span>
+            </span>
+            <p>OPFS cache, manual model download, and live mic + VAD.</p>
+          </a>
+        </div>
+      </section>
     </main>
 
     <nav class="nav-links" aria-label="Project links">
       <a href="/docs/">Docs</a>
-      <a href="/demo/">Live Demo</a>
-      <a href="/examples/">Examples</a>
+      <a href="/demo/">Live demo</a>
+      <a href="/examples/">All demos</a>
       <a href="https://www.npmjs.com/package/browser-whisper" target="_blank" rel="noopener noreferrer">npm</a>
       <a href="https://github.com/tanpreetjolly/browser-whisper" target="_blank" rel="noopener noreferrer">GitHub</a>
       <a href="https://github.com/tanpreetjolly/browser-whisper-vite-demo" target="_blank" rel="noopener noreferrer">Vite example</a>

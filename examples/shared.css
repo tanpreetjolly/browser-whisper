@@ -310,31 +310,68 @@ input[type="file"] {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
-/* Examples index */
+/* Demos hub */
+.demo-hub-section {
+  margin-bottom: 2rem;
+}
+
+.demo-hub-section:last-child {
+  margin-bottom: 0;
+}
+
+.demo-hub-heading {
+  margin: 0 0 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--gray-500);
+}
+
+.demo-hub-desc {
+  margin: 0 0 0.85rem;
+  font-size: 0.85rem;
+  color: var(--gray-500);
+  max-width: 52ch;
+}
+
 .examples-grid {
   display: grid;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .example-card {
   display: block;
-  padding: 1.25rem;
+  padding: 1.25rem 1.35rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
+  background: var(--bg);
   box-shadow: 0 1px 2px var(--ring);
-  transition: border-color 0.15s, box-shadow 0.15s;
   color: inherit;
   text-decoration: none;
+  position: relative;
+  transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.example-card:hover {
+.example-card:hover,
+.example-card:focus-visible {
+  background: var(--gray-50);
   border-color: var(--gray-300);
-  box-shadow: 0 4px 12px var(--ring);
+  box-shadow: 0 2px 8px var(--ring);
   color: inherit;
+  outline: none;
+}
+
+.example-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.4rem;
 }
 
 .example-card h2 {
-  margin: 0 0 0.35rem;
+  margin: 0;
   font-size: 1rem;
   font-weight: 600;
   color: var(--fg);
@@ -347,14 +384,52 @@ input[type="file"] {
   font-size: 0.85rem;
   color: var(--gray-500);
   font-weight: 400;
+  line-height: 1.55;
+  padding-right: 1.5rem;
 }
 
 .example-card .tag {
   display: inline-block;
-  margin-top: 0.65rem;
-  font-size: 0.72rem;
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--gray-500);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+}
+
+.example-card .card-link {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 500;
+  color: var(--fg);
+}
+
+.example-card::after {
+  content: "→";
+  position: absolute;
+  right: 1.15rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gray-400);
+  font-size: 1rem;
+  transition: transform 0.15s, color 0.15s;
+}
+
+.example-card:hover::after,
+.example-card:focus-visible::after {
+  transform: translate(2px, -50%);
+  color: var(--fg);
+}
+
+.badge-opfs {
+  color: var(--gray-800);
+  background: var(--gray-100);
 }
 
 @media (max-width: 800px) {

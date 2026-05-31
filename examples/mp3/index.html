@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MP3 transcribe — browser-whisper</title>
-  <meta name="description" content="Download a Whisper model and transcribe an audio file in the browser with browser-whisper." />
+  <title>File transcribe (OPFS cache) — browser-whisper</title>
+  <meta name="description" content="OPFS cache demo: manually download a Whisper model, then transcribe an audio file in the browser with browser-whisper." />
   <link rel="canonical" href="https://whisper.tanpreet.xyz/examples/mp3/" />
   <link rel="icon" href="/8134.ico" type="image/x-icon" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,20 +19,21 @@
   <div class="page">
     <header class="site-header">
       <div class="title-row">
-        <h1>MP3 transcribe</h1>
-        <span class="badge">Example</span>
+        <h1>File transcribe</h1>
+        <span class="badge badge-opfs">OPFS cache</span>
       </div>
       <nav class="header-links" aria-label="Site navigation">
-        <a href="/examples/" class="back">All examples</a>
+        <a href="/examples/" class="back">All demos</a>
         <a href="/">Pkg</a>
         <a href="/docs/">Docs</a>
-        <a href="/demo/">Demo</a>
+        <a href="/demo/">Live demo</a>
       </nav>
     </header>
 
     <p class="lead">
-      Choose an audio file, download a model, then transcribe. You can also place
-      <code>audio.mp3</code> in <code>public/</code> for a default sample at <code>/audio.mp3</code>.
+      OPFS cache workflow: <strong>Download model</strong> fills the browser cache (watch the event log),
+      then <strong>Transcribe</strong> runs from cached weights. Pick any audio file, or add
+      <code>public/audio.mp3</code> for a default at <code>/audio.mp3</code>.
     </p>
 
     <section class="card" aria-label="Controls">

@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Examples — browser-whisper</title>
-  <meta name="description" content="Mini examples for browser-whisper: live microphone transcription with VAD and file-based MP3 transcription." />
+  <title>Demos — browser-whisper</title>
+  <meta name="description" content="Browser demos for browser-whisper: live file transcription, OPFS model-cache workflows, and live microphone + VAD." />
   <link rel="canonical" href="https://whisper.tanpreet.xyz/examples/" />
   <link rel="icon" href="/8134.ico" type="image/x-icon" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,32 +19,72 @@
   <div class="page">
     <header class="site-header">
       <div class="title-row">
-        <h1>Examples</h1>
+        <h1>Demos</h1>
       </div>
       <nav class="header-links" aria-label="Site navigation">
         <a href="/" class="back">Back to pkg</a>
         <a href="/docs/">Docs</a>
-        <a href="/demo/">Live demo</a>
       </nav>
     </header>
 
     <p class="lead">
-      Small, focused demos that show how to use browser-whisper in real flows.
-      Each runs entirely in your browser (WebGPU + COOP/COEP required).
+      These pages are how we exercise browser-whisper in the browser: same library, different flows.
+      After the first <strong>Download model</strong> or <strong>Prepare</strong>, weights live in
+      <a href="https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system" target="_blank" rel="noopener noreferrer">OPFS</a>
+      and later runs can work offline. WebGPU and COOP/COEP headers are required.
     </p>
 
-    <div class="examples-grid">
-      <a class="example-card" href="/examples/live-vad/">
-        <h2>Live VAD + Whisper</h2>
-        <p>Microphone capture with voice-activity detection; transcribes each utterance as you speak.</p>
-        <span class="tag">Requires mic permission · uses @ricky0123/vad-web</span>
-      </a>
-      <a class="example-card" href="/examples/mp3/">
-        <h2>MP3 transcribe</h2>
-        <p>Download a model, then transcribe an audio file with segment timestamps and progress logs.</p>
-        <span class="tag">Pick a file or serve <code>public/audio.mp3</code></span>
-      </a>
-    </div>
+    <section class="demo-hub-section" aria-labelledby="live-demo-heading">
+      <h2 class="demo-hub-heading" id="live-demo-heading">Live demo</h2>
+      <p class="demo-hub-desc">
+        The polished path: pick a file and transcribe. The model downloads automatically when you start.
+      </p>
+      <div class="examples-grid">
+        <a class="example-card" href="/demo/">
+          <div class="example-card-header">
+            <h2>File transcription</h2>
+            <span class="tag">Live demo</span>
+          </div>
+          <p>Upload audio or video, choose a model, and stream timestamped segments with playback sync.</p>
+          <span class="card-link">Open live demo</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="demo-hub-section" aria-labelledby="opfs-heading">
+      <h2 class="demo-hub-heading" id="opfs-heading">OPFS model cache</h2>
+      <p class="demo-hub-desc">
+        Mirrors how we test caching: call <code>downloadModel()</code> yourself, watch progress in the log,
+        then transcribe from the cached weights.
+      </p>
+      <div class="examples-grid">
+        <a class="example-card" href="/examples/mp3/">
+          <div class="example-card-header">
+            <h2>File transcribe</h2>
+            <span class="tag badge-opfs">OPFS cache</span>
+          </div>
+          <p>Separate download and transcribe steps, event log, and segment output. Use any audio file or <code>public/audio.mp3</code>.</p>
+          <span class="card-link">Open OPFS demo</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="demo-hub-section" aria-labelledby="streaming-heading">
+      <h2 class="demo-hub-heading" id="streaming-heading">Live streaming</h2>
+      <p class="demo-hub-desc">
+        Real-time microphone input with voice-activity detection; each utterance is sent to Whisper after you prepare the model.
+      </p>
+      <div class="examples-grid">
+        <a class="example-card" href="/examples/live-vad/">
+          <div class="example-card-header">
+            <h2>Live VAD + Whisper</h2>
+            <span class="tag">Mic + VAD</span>
+          </div>
+          <p>Prepare downloads the model to OPFS, then VAD splits speech into chunks for transcription as you talk.</p>
+          <span class="card-link">Open streaming demo</span>
+        </a>
+      </div>
+    </section>
   </div>
 </body>
 </html>

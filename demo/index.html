@@ -163,6 +163,34 @@
       color: var(--fg);
     }
 
+    .demo-intro {
+      margin: 0 0 1.25rem;
+      font-size: 0.85rem;
+      line-height: 1.55;
+      color: var(--gray-500);
+    }
+
+    .demo-intro a {
+      color: var(--fg);
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .demo-intro a:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .demo-intro code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8em;
+      background: var(--gray-100);
+      border: 1px solid var(--border);
+      padding: 0.1em 0.35em;
+      border-radius: 4px;
+      color: var(--fg);
+    }
+
     /* ── Notice Banner ──────────────────────────────────── */
     .notice {
       background: var(--gray-50);
@@ -740,9 +768,14 @@
       <div class="header-links">
         <a href="/" class="back" rel="author">Back to pkg</a>
         <a href="/docs/" class="docs-link">Docs</a>
-        <a href="/examples/" class="docs-link">Examples</a>
+        <a href="/examples/" class="docs-link">All demos</a>
       </div>
     </header>
+
+    <p class="demo-intro">
+      Upload a file and transcribe in one step — models cache in OPFS after the first run.
+      For manual <code>downloadModel()</code> or live mic flows, see <a href="/examples/">all demos</a>.
+    </p>
 
     <!-- Dismissable notice — tucks itself away once closed -->
     <div class="notice" id="notice">
