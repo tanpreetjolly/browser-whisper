@@ -1,4 +1,7 @@
 {
+  "buildCommand": "bun run build:site",
+  "outputDirectory": "dist-site",
+  "installCommand": "bun install",
   "headers": [
     {
       "source": "/(demo|examples)/(.*)",

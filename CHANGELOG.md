@@ -9,9 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] — 2026-05-31
+
 ### Added
-- Initial project scaffold (Bun + Vite + TypeScript)
-- `README.md`, `LICENSE`, `.gitignore`, `.editorconfig`
-- Vite library build config with multi-entry worker support
-- Phase 1: `src/types.ts` — shared TypeScript types and worker message types
-- Phase 1: `src/errors.ts` — custom error classes
+- Word-level timestamps for `*_timestamped` models (`words` on `TranscriptSegment`)
+- Documentation site (`/docs/`), demos hub (`/examples/`), and site routes for live VAD and OPFS cache demos
+- Full model list in demo and example selectors
+
+### Changed
+- Demo playback sync for per-word highlighting when using timestamped models
