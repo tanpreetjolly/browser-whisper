@@ -2,6 +2,12 @@
   "buildCommand": "bun run build:site",
   "outputDirectory": "dist-site",
   "installCommand": "bun install",
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/api/home"
+    }
+  ],
   "headers": [
     {
       "source": "/(demo|examples)/(.*)",
