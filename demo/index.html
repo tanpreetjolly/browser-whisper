@@ -151,10 +151,10 @@
       background: var(--gray-50);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 1rem 1.25rem;
-      font-size: 0.85rem;
+      padding: 0.65rem 0.85rem;
+      font-size: 0.8rem;
       color: var(--gray-500);
-      line-height: 1.6;
+      line-height: 1.5;
       display: flex;
       align-items: flex-start;
       gap: 1rem;
@@ -177,12 +177,6 @@
       overflow: hidden;
     }
 
-    .notice-icon {
-      font-size: 1rem;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
     .notice-content {
       flex: 1;
     }
@@ -194,11 +188,32 @@
 
     .notice code {
       background: var(--gray-200);
-      padding: 0.1rem 0.35rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
+      padding: 0.05rem 0.3rem;
+      border-radius: 3px;
+      font-size: 0.72rem;
       color: var(--fg);
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .notice-flags {
+      margin: 0.45rem 0 0;
+      padding: 0;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .notice-flags li {
+      font-size: 0.72rem;
+      line-height: 1.45;
+    }
+
+    .notice-flags code {
+      display: block;
+      margin-top: 0.15rem;
+      padding: 0.3rem 0.45rem;
+      word-break: break-all;
     }
 
     .notice-dismiss,
@@ -677,11 +692,12 @@
 
     <!-- Dismissable notice — tucks itself away once closed -->
     <div class="notice" id="notice">
-      <span class="notice-icon">💡</span>
       <div class="notice-content">
-        <strong>For best results, use Chromium browsers</strong> (Chrome, Edge, Brave, Arc).<br>
-        <strong>🐧 Linux:</strong> Launch with
-        <code>google-chrome --enable-unsafe-webgpu --enable-features=Vulkan</code>
+        <strong>WebGPU required.</strong> Use Chromium (Chrome, Edge, Brave, Arc) with these flags enabled:
+        <ul class="notice-flags">
+          <li><code>--enable-unsafe-webgpu</code></li>
+          <li><code>--enable-features=Vulkan</code></li>
+        </ul>
       </div>
       <button class="notice-dismiss" id="dismissNotice" title="Dismiss">✕</button>
     </div>
