@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documentation — browser-whisper</title>
+  <meta name="description" content="Setup and usage guide for browser-whisper: install, WebGPU requirements, COOP/COEP headers, API reference, and browser support." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://whisper.tanpreet.xyz/docs/" />
+  <meta property="og:title" content="Documentation — browser-whisper" />
+  <meta property="og:description" content="How to install and use browser-whisper for in-browser Whisper transcription with WebGPU." />
+  <meta property="og:url" content="https://whisper.tanpreet.xyz/docs/" />
+  <link rel="icon" href="/8134.ico" type="image/x-icon" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #171717;
+      --muted: #6b7280;
+      --subtle: #9ca3af;
+      --border: #e5e7eb;
+      --surface: #f9fafb;
+      --code-bg: #f3f4f6;
+      --sidebar-w: 240px;
+      --content-max: 640px;
+      --radius: 6px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      color: var(--fg);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--fg); text-underline-offset: 3px; }
+    a:hover { color: var(--muted); }
+
+    /* ── Layout ─────────────────────────────────────────── */
+    .layout {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      width: 100%;
+      max-width: calc(var(--sidebar-w) + var(--content-max) + 5rem);
+      margin: 0 auto;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 0;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    .sidebar-brand {
+      padding: 0 1.25rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 1rem;
+    }
+
+    .sidebar-brand a {
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: -0.02em;
+    }
+
+    .sidebar-brand span {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 500;
+      margin-top: 0.2rem;
+    }
+
+    .sidebar nav {
+      padding: 0 0.75rem;
+    }
+
+    .nav-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .nav-group-title {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--subtle);
+      padding: 0 0.5rem;
+      margin: 0 0 0.4rem;
+    }
+
+    .sidebar nav a {
+      display: block;
+      padding: 0.35rem 0.5rem;
+      font-size: 0.8125rem;
+      color: var(--muted);
+      text-decoration: none;
+      border-radius: 4px;
+      transition: color 0.12s, background 0.12s;
+    }
+
+    .sidebar nav a:hover {
+      color: var(--fg);
+      background: var(--surface);
+    }
+
+    .sidebar nav a.active {
+      color: var(--fg);
+      background: var(--surface);
+      font-weight: 500;
+    }
+
+    .sidebar-footer {
+      padding: 1rem 1.25rem 0;
+      margin-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+    }
+
+    .sidebar-footer a {
+      color: var(--muted);
+      text-decoration: none;
+      display: block;
+      padding: 0.25rem 0;
+    }
+
+    .main {
+      width: 100%;
+      max-width: var(--content-max);
+      justify-self: center;
+      padding: 2.5rem 2rem 5rem;
+      margin: 0 auto;
+    }
+
+    /* ── Content typography ─────────────────────────────── */
+    .lead {
+      font-size: 1rem;
+      color: var(--muted);
+      margin: 0 0 2.5rem;
+      line-height: 1.7;
+      max-width: var(--content-max);
+    }
+
+    section {
+      margin-bottom: 3rem;
+      scroll-margin-top: 1.5rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      letter-spacing: -0.03em;
+      margin: 0 0 0.75rem;
+      line-height: 1.25;
+    }
+
+    h2 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.75rem;
+      padding-top: 0.5rem;
+    }
+
+    h3 {
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    p {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      max-width: var(--content-max);
+    }
+
+    p strong, li strong { color: var(--fg); font-weight: 600; }
+
+    ul, ol {
+      margin: 0 0 1rem;
+      padding-left: 1.25rem;
+      color: var(--muted);
+      max-width: var(--content-max);
+    }
+
+    li { margin-bottom: 0.35rem; }
+
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0.85rem 1rem;
+      margin: 0 0 1.25rem;
+      max-width: var(--content-max);
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .callout strong { color: var(--fg); }
+
+    .callout ul {
+      margin: 0.5rem 0 0;
+      padding-left: 1.1rem;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      margin: 0 0 1.25rem;
+      max-width: var(--content-max);
+      font-size: 0.8125rem;
+      line-height: 1.55;
+    }
+
+    pre code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: var(--fg);
+    }
+
+    :not(pre) > code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.8em;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 0.12em 0.35em;
+      border-radius: 4px;
+      color: var(--fg);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0 0 1.25rem;
+      max-width: var(--content-max);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+    }
+
+    th {
+      text-align: left;
+      font-weight: 500;
+      color: var(--muted);
+      padding: 0.6rem 0.85rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.6rem 0.85rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    td code {
+      font-size: 0.75rem;
+    }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0;
+      max-width: var(--content-max);
+    }
+
+    @media (max-width: 768px) {
+      .layout {
+        grid-template-columns: 1fr;
+        max-width: var(--content-max);
+      }
+
+      .sidebar {
+        position: relative;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .main {
+        justify-self: stretch;
+        padding: 1.5rem 1.25rem 3rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <a href="/">browser-whisper</a>
+        <span>Documentation</span>
+      </div>
+      <nav aria-label="Documentation">
+        <div class="nav-group">
+          <p class="nav-group-title">Getting started</p>
+          <a href="#introduction">Introduction</a>
+          <a href="#requirements">Requirements</a>
+          <a href="#install">Install</a>
+          <a href="#headers">Server headers</a>
+          <a href="#quick-start">Quick start</a>
+        </div>
+        <div class="nav-group">
+          <p class="nav-group-title">Reference</p>
+          <a href="#api">API</a>
+          <a href="#models">Models</a>
+          <a href="#browser-support">Browser support</a>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/demo/">Live demo</a>
+        <a href="/examples/">Examples</a>
+        <a href="https://github.com/tanpreetjolly/browser-whisper" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://www.npmjs.com/package/browser-whisper" target="_blank" rel="noopener noreferrer">npm</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <h1>Documentation</h1>
+      <p class="lead">
+        Run OpenAI Whisper entirely in the browser — no server, no API keys.
+        This guide covers install, required headers, and everyday usage.
+      </p>
+
+      <section id="introduction">
+        <h2>Introduction</h2>
+        <p>
+          <strong>browser-whisper</strong> decodes audio with <strong>WebCodecs</strong>
+          (via mediabunny) and runs inference with <strong>WebGPU</strong>
+          (via Transformers.js). If WebGPU or WebCodecs is unavailable, the library
+          falls back to WASM and <code>AudioContext</code> automatically.
+        </p>
+        <p>
+          Audio moves between two Web Workers over a <code>MessageChannel</code> so the
+          main thread stays responsive. Results stream back as an async iterator, one
+          segment at a time.
+        </p>
+      </section>
+
+      <section id="requirements">
+        <h2>Requirements</h2>
+        <div class="callout">
+          <strong>WebGPU required.</strong> Use a Chromium-based browser (Chrome, Edge, Brave, Arc) with these flags enabled:
+          <ul>
+            <li><code>--enable-unsafe-webgpu</code></li>
+            <li><code>--enable-features=Vulkan</code></li>
+          </ul>
+        </div>
+        <p>
+          Your app must also send <strong>COOP/COEP headers</strong> on every page that loads
+          the library (see below). Without them, SharedArrayBuffer is unavailable and
+          model loading will fail.
+        </p>
+      </section>
+
+      <section id="install">
+        <h2>Install</h2>
+        <pre><code>npm install browser-whisper
+# or
+bun add browser-whisper</code></pre>
+        <p>
+          No peer dependencies — Transformers.js and mediabunny are bundled into the
+          worker at build time.
+        </p>
+      </section>
+
+      <section id="headers">
+        <h2>Server headers</h2>
+        <p>
+          Add these headers on any route that uses browser-whisper:
+        </p>
+        <pre><code>Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Opener-Policy: same-origin</code></pre>
+
+        <h3>Vite</h3>
+        <pre><code>// vite.config.ts
+export default defineConfig({
+  server: {
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
+  },
+  preview: {
+    headers: {
+      'Cross-Origin-Embedder-Policy': 'require-corp',
+      'Cross-Origin-Opener-Policy': 'same-origin',
+    },
+  },
+})</code></pre>
+
+        <h3>Next.js</h3>
+        <p>
+          Set the same headers in <code>next.config.js</code> (or middleware) for routes
+          that load the library. Import browser-whisper only on the client — it uses
+          Web Workers and cannot run during SSR.
+        </p>
+        <pre><code>// next.config.js
+const nextConfig = {
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+          { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+        ],
+      },
+    ]
+  },
+}
+module.exports = nextConfig</code></pre>
+        <p>
+          See the <a href="https://github.com/tanpreetjolly/browser-whisper-nextjs-demo" target="_blank" rel="noopener noreferrer">Next.js example</a>
+          for a full app setup.
+        </p>
+      </section>
+
+      <section id="quick-start">
+        <h2>Quick start</h2>
+        <pre><code>import { BrowserWhisper } from 'browser-whisper'
+
+const whisper = new BrowserWhisper({ model: 'whisper-base' })
+const file = document.querySelector('input[type=file]').files[0]
+
+for await (const { text, start, end } of whisper.transcribe(file)) {
+  console.log(`[${start.toFixed(1)}s] ${text}`)
+}</code></pre>
+
+        <h3>Collect all segments</h3>
+        <pre><code>const segments = await whisper.transcribe(file).collect()
+console.log(segments.map(s => s.text).join(' '))</code></pre>
+
+        <h3>Pre-download a model</h3>
+        <pre><code>await whisper.downloadModel('whisper-small')</code></pre>
+        <p>
+          Weights are cached in the browser (OPFS) after the first download.
+        </p>
+
+        <h3>With callbacks</h3>
+        <pre><code>whisper.transcribe(file, {
+  language: 'en',
+  onSegment: (seg) => appendToUI(seg),
+  onProgress: ({ stage, progress }) => {
+    console.log(stage, Math.round(progress * 100) + '%')
+  },
+})</code></pre>
+      </section>
+
+      <section id="api">
+        <h2>API</h2>
+
+        <h3><code>new BrowserWhisper(options?)</code></h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Option</th><th>Default</th><th>Description</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>model</code></td><td><code>whisper-base</code></td><td>Whisper model size</td></tr>
+              <tr><td><code>language</code></td><td>auto</td><td>BCP-47 code, e.g. <code>en</code></td></tr>
+              <tr><td><code>quantization</code></td><td><code>hybrid</code></td><td>fp32, fp16, q8, q4, or hybrid</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3><code>whisper.transcribe(file, options?)</code></h3>
+        <p>
+          Returns a <code>TranscribeStream</code> (async iterable). Override
+          <code>model</code>, <code>language</code>, or <code>quantization</code> per call.
+          Use <code>onSegment</code> and <code>onProgress</code> for callbacks.
+        </p>
+
+        <h3><code>whisper.transcribePCM(samples)</code></h3>
+        <p>
+          Transcribe a mono <code>Float32Array</code> at 16 kHz (e.g. from a VAD pipeline).
+          Skips file decoding.
+        </p>
+
+        <h3><code>whisper.downloadModel(model)</code></h3>
+        <p>
+          Download and cache a model without transcribing. Supports
+          <code>onProgress</code> and <code>AbortSignal</code>.
+        </p>
+
+        <h3><code>BrowserWhisper.clearCache()</code> / <code>deleteModel(model)</code></h3>
+        <p>Remove cached model weights from the browser.</p>
+
+        <h3><code>TranscriptSegment</code></h3>
+        <pre><code>{ text: string, start: number, end: number }</code></pre>
+        <p><code>start</code> and <code>end</code> are in seconds from the beginning of the file.</p>
+
+        <p>
+          Full API details are in the
+          <a href="https://github.com/tanpreetjolly/browser-whisper#api" target="_blank" rel="noopener noreferrer">README on GitHub</a>.
+        </p>
+      </section>
+
+      <section id="models">
+        <h2>Models</h2>
+        <p>Download sizes use default <code>hybrid</code> quantization (encoder fp32 + decoder q4).</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Model</th><th>Size</th><th>Notes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>moonshine-tiny</code></td><td>~32 MB</td><td>English only · fastest</td></tr>
+              <tr><td><code>moonshine-base</code></td><td>~61 MB</td><td>English only</td></tr>
+              <tr><td><code>whisper-tiny</code></td><td>~64 MB</td><td>Multilingual · fastest Whisper</td></tr>
+              <tr><td><code>whisper-base</code></td><td>~136 MB</td><td>Multilingual · default</td></tr>
+              <tr><td><code>whisper-small</code></td><td>~510 MB</td><td>Multilingual · better accuracy</td></tr>
+              <tr><td><code>whisper-tiny_timestamped</code></td><td>~118 MB</td><td>Word-level timestamps</td></tr>
+              <tr><td><code>whisper-base_timestamped</code></td><td>~201 MB</td><td>Word-level timestamps</td></tr>
+              <tr><td><code>whisper-small_timestamped</code></td><td>~563 MB</td><td>Word-level timestamps</td></tr>
+              <tr><td><code>lite-whisper-large-v3-turbo-fast</code></td><td>~1.49 GB</td><td>Large · speed-optimized</td></tr>
+              <tr><td><code>lite-whisper-large-v3-turbo</code></td><td>~1.72 GB</td><td>Large · balanced</td></tr>
+              <tr><td><code>lite-whisper-large-v3-turbo-acc</code></td><td>~1.89 GB</td><td>Large · accuracy-optimized</td></tr>
+              <tr><td><code>whisper-large-v3-turbo</code></td><td>~2.69 GB</td><td>Best turbo accuracy</td></tr>
+              <tr><td><code>whisper-large-v3-turbo_timestamped</code></td><td>~2.69 GB</td><td>Turbo + word timestamps</td></tr>
+              <tr><td><code>whisper-large-v3</code></td><td>~3.12 GB</td><td>Highest accuracy</td></tr>
+              <tr><td><code>distil-whisper-small</code></td><td>~185 MB</td><td>English only · Distil</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          Models are fetched from Hugging Face (<code>onnx-community</code>) on first run,
+          then cached locally.
+        </p>
+      </section>
+
+      <section id="browser-support">
+        <h2>Browser support</h2>
+        <p>WebGPU and WebCodecs are preferred; fallbacks run automatically when needed.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Browser</th><th>WebGPU</th><th>WebCodecs</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Chrome</td><td>113+</td><td>94+</td></tr>
+              <tr><td>Firefox</td><td>141+</td><td>130+</td></tr>
+              <tr><td>Safari</td><td>18+</td><td>16.4+</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          First run needs network access for WASM (~1 MB from CDN) and model weights.
+          After caching, transcription works offline.
+        </p>
+      </section>
+
+      <hr />
+      <p>
+        <a href="/demo/">Try the live demo</a> ·
+        <a href="/examples/">Mini examples</a> ·
+        <a href="https://github.com/tanpreetjolly/browser-whisper-vite-demo" target="_blank" rel="noopener noreferrer">Vite example</a> ·
+        <a href="https://github.com/tanpreetjolly/browser-whisper-nextjs-demo" target="_blank" rel="noopener noreferrer">Next.js example</a>
+      </p>
+    </main>
+  </div>
+
+  <script>
+    const links = document.querySelectorAll('.sidebar nav a[href^="#"]');
+    const sections = [...links].map(a => document.querySelector(a.getAttribute('href'))).filter(Boolean);
+
+    const setActive = () => {
+      let current = links[0];
+      for (const section of sections) {
+        if (section.getBoundingClientRect().top <= 120) current = links[[...sections].indexOf(section)];
+      }
+      links.forEach(a => a.classList.toggle('active', a === current));
+    };
+
+    window.addEventListener('scroll', setActive, { passive: true });
+    setActive();
+  </script>
+</body>
+
+</html>
