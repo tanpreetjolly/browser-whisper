@@ -146,6 +146,23 @@
       opacity: 0.5;
     }
 
+    .header-links {
+      display: flex;
+      gap: 1.25rem;
+      align-items: center;
+    }
+
+    a.docs-link {
+      color: var(--gray-500);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    a.docs-link:hover {
+      color: var(--fg);
+    }
+
     /* ── Notice Banner ──────────────────────────────────── */
     .notice {
       background: var(--gray-50);
@@ -687,7 +704,11 @@
         <h1>browser-whisper</h1>
         <span class="version">v1.1.0</span>
       </div>
-      <a href="/" class="back" rel="author">Back to pkg</a>
+      <div class="header-links">
+        <a href="/" class="back" rel="author">Back to pkg</a>
+        <a href="/docs/" class="docs-link">Docs</a>
+        <a href="/examples/" class="docs-link">Examples</a>
+      </div>
     </header>
 
     <!-- Dismissable notice — tucks itself away once closed -->
@@ -721,12 +742,28 @@
               <option value="whisper-base">Whisper Base (~76 MB)</option>
               <option value="whisper-small">Whisper Small (~240 MB)</option>
             </optgroup>
+            <optgroup label="Whisper (timestamped)">
+              <option value="whisper-tiny_timestamped">Whisper Tiny Timestamped (~118 MB)</option>
+              <option value="whisper-base_timestamped">Whisper Base Timestamped (~201 MB)</option>
+              <option value="whisper-small_timestamped">Whisper Small Timestamped (~563 MB)</option>
+            </optgroup>
+            <optgroup label="Whisper Large">
+              <option value="lite-whisper-large-v3-turbo-fast">Lite Large V3 Turbo Fast (~1.49 GB)</option>
+              <option value="lite-whisper-large-v3-turbo">Lite Large V3 Turbo (~1.72 GB)</option>
+              <option value="lite-whisper-large-v3-turbo-acc">Lite Large V3 Turbo Acc (~1.89 GB)</option>
+              <option value="whisper-large-v3-turbo">Whisper Large V3 Turbo (~2.69 GB)</option>
+              <option value="whisper-large-v3-turbo_timestamped">Whisper Large V3 Turbo Timestamped (~2.69 GB)</option>
+              <option value="whisper-large-v3">Whisper Large V3 (~3.12 GB)</option>
+            </optgroup>
             <optgroup label="Distil-Whisper (English only)">
               <option value="distil-whisper-small">Distil Whisper Small (~185 MB)</option>
             </optgroup>
           </select>
           <button id="transcribeBtn" disabled>Transcribe</button>
         </div>
+        <p class="timestamp-hint" id="timestampHint" hidden>
+          Timestamped model — click words while playing to seek; words highlight in sync.
+        </p>
         <div class="status" id="statusLog" role="status" aria-live="polite">Ready — select an audio or video file to begin.</div>
         <div class="progress-wrap" id="progressWrap" aria-hidden="true">
           <div class="progress-bar-track">
