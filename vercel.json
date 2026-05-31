@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/demo/(.*)",
+      "source": "/(demo|examples)/(.*)",
       "headers": [
         {
           "key": "Cross-Origin-Embedder-Policy",

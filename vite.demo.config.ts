@@ -10,8 +10,21 @@ export default defineConfig({
             input: {
                 main: resolve(__dirname, 'index.html'),
                 demo: resolve(__dirname, 'demo/index.html'),
+                docs: resolve(__dirname, 'docs/index.html'),
+                'examples/index': resolve(__dirname, 'examples/index.html'),
+                'examples/live-vad/index': resolve(__dirname, 'examples/live-vad/index.html'),
+                'examples/mp3/index': resolve(__dirname, 'examples/mp3/index.html'),
             },
         },
+    },
+
+    resolve: {
+        alias: [
+            {
+                find: /^.*\.wasm(\?url)?$/,
+                replacement: resolve(__dirname, 'src/lib/empty-wasm.js'),
+            },
+        ],
     },
 
     // Workers are ES modules
