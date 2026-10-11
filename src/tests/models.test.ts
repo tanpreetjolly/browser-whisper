@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { MODELS, type ASRModel } from '../types';
+import { MODELS } from '../types';
 
 describe('MODELS', () => {
     test('word timestamps imply segment timestamps', () => {
@@ -27,22 +27,16 @@ describe('MODELS', () => {
     });
 
     test('English-only models reject language selection', () => {
-        const englishOnlyModels = [
-            'moonshine-tiny',
-            'moonshine-base',
-            'distil-whisper-small',
-        ] satisfies ASRModel[];
-
-        for (const model of englishOnlyModels) {
-            expect(MODELS[model].supportsLanguage).toBe(false);
+        for (const [name, config] of Object.entries(MODELS)) {
+            if (name.startsWith('moonshine-') || name.startsWith('distil-whisper')) {
+                expect(config.supportsLanguage).toBe(false);
+            }
         }
     });
 
     test('Moonshine models do not support timestamps', () => {
-        const moonshineModels = ['moonshine-tiny', 'moonshine-base'] satisfies ASRModel[];
-
-        for (const model of moonshineModels) {
-            expect(MODELS[model].supportsTimestamps).toBe(false);
+        for (const [name, config] of Object.entries(MODELS)) {
+            if (name.startsWith('moonshine-')) expect(config.supportsTimestamps).toBe(false);
         }
     });
 
