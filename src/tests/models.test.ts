@@ -58,21 +58,9 @@ describe('MODELS', () => {
         });
     });
 
-    test('whisper-large-v3 declares external data for its fp32 encoder and decoder only', () => {
-        // onnx-community/whisper-large-v3-ONNX ships fp32 weights in *.onnx_data but its
-        // config.json has no transformers.js_config, so we must declare them ourselves.
-        expect(MODELS['whisper-large-v3'].externalData).toEqual({
-            'encoder_model.onnx': true,
-            'decoder_model_merged.onnx': true,
-        });
-        // Keys are full file names so quantized variants (e.g. decoder_model_merged_q4.onnx) are not affected.
-        for (const key of Object.keys(MODELS['whisper-large-v3'].externalData!)) {
-            expect(key).toMatch(/^[a-z_]+\.onnx$/);
-        }
-    });
-
-    test('only whisper-large-v3 overrides external data (others declare it on the Hub or have none)', () => {
-        const withOverride = (Object.keys(MODELS) as ASRModel[]).filter((m) => MODELS[m].externalData);
-        expect(withOverride).toEqual(['whisper-large-v3']);
+    test('whisper-large-v3 is not offered (its 2.55 GB fp32 encoder cannot be allocated in browsers)', () => {
+        expect(Object.keys(MODELS)).not.toContain('whisper-large-v3');
+        expect(MODELS['whisper-large-v3-turbo']).toBeDefined();
+        expect(MODELS['whisper-large-v3-turbo_timestamped']).toBeDefined();
     });
 });

@@ -9,6 +9,10 @@ Dates are npm publish dates in **IST (UTC+5:30)**, taken from the npm registry. 
 
 ## [Unreleased]
 
+### Removed
+- **Breaking (TypeScript):** `whisper-large-v3` is no longer an `ASRModel`. Its fp32 encoder is a single 2.55 GB `encoder_model.onnx_data` file, which browsers can't allocate in one ArrayBuffer (`RangeError: Array buffer allocation failed`), so the model never loaded. Code passing `model: 'whisper-large-v3'` now fails to type-check; plain JS callers get a load error. Use `whisper-large-v3-turbo` instead, ideally with `quantization: 'q4'` or `'fp16'` (its default hybrid mode also loads a 2.55 GB fp32 encoder).
+- The internal `ModelConfig.externalData` override, which only `whisper-large-v3` used. Repos that declare external data in their own `transformers.js_config` are unaffected.
+
 ### Fixed
 - Model-load failures that escaped transformers.js' internal promises (e.g. `RangeError: Array buffer allocation failed` while fetching multi-GB ONNX external data) left loading stuck at 99% forever. The worker now traps unhandled rejections/errors during load and `waitForReady` rejects with a `ModelLoadError`.
 - OPFS caching is now best-effort: a failed cache write logs a warning, removes the partial file, and loading continues from the network response.
