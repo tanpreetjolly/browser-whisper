@@ -124,9 +124,6 @@ self.onmessage = async (e: MessageEvent) => {
                             device,
                             dtype,
                             progress_callback: trackProgress,
-                            // Explicit external-data map for repos that don't declare it in
-                            // config.json; undefined falls back to the repo's transformers.js_config.
-                            ...(config.externalData ? { use_external_data_format: config.externalData } : {}),
                         },
                     )) as ASRPipeline;
                 };

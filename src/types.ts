@@ -11,7 +11,6 @@ export type ASRModel =
     | 'whisper-small_timestamped'
     | 'whisper-large-v3-turbo'
     | 'whisper-large-v3-turbo_timestamped'
-    | 'whisper-large-v3'
     | 'lite-whisper-large-v3-turbo-fast'
     | 'lite-whisper-large-v3-turbo'
     | 'lite-whisper-large-v3-turbo-acc'
@@ -31,14 +30,6 @@ export interface ModelConfig {
     supportsWordTimestamps: boolean;
     /** Whether the model supports the language parameter */
     supportsLanguage: boolean;
-    /**
-     * ONNX files whose weights live in separate `<file>_data` external-data files, keyed by the
-     * full ONNX file name (e.g. `encoder_model.onnx`, so quantized variants are unaffected).
-     * Value is `true` (one `.onnx_data` file) or the number of chunks. Passed to transformers.js
-     * as `use_external_data_format`. Only needed when the Hub repo's config.json does not declare
-     * it in `transformers.js_config`; when set it replaces the repo's own declaration.
-     */
-    externalData?: Record<string, boolean | number>;
 }
 
 const WHISPER_HYBRID = { encoder_model: 'fp32', decoder_model_merged: 'q4' };
@@ -56,11 +47,6 @@ export const MODELS: Record<ASRModel, ModelConfig> = {
     'whisper-small_timestamped':            { hfId: 'onnx-community/whisper-small_timestamped',                 hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
     'whisper-large-v3-turbo':               { hfId: 'onnx-community/whisper-large-v3-turbo',                    hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
     'whisper-large-v3-turbo_timestamped':   { hfId: 'onnx-community/whisper-large-v3-turbo_timestamped',        hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
-    // The fp32 encoder/decoder are ~0.4 MB / ~2.3 MB graph stubs whose weights live in
-    // encoder_model.onnx_data (2.55 GB) and decoder_model_merged.onnx_data (3.63 GB). The repo's
-    // config.json has no `transformers.js_config`, so transformers.js would never fetch them.
-    'whisper-large-v3':                     { hfId: 'onnx-community/whisper-large-v3-ONNX',                     hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true,
-                                              externalData: { 'encoder_model.onnx': true, 'decoder_model_merged.onnx': true } },
     'lite-whisper-large-v3-turbo-fast':     { hfId: 'onnx-community/lite-whisper-large-v3-turbo-fast-ONNX',     hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
     'lite-whisper-large-v3-turbo':          { hfId: 'onnx-community/lite-whisper-large-v3-turbo-ONNX',          hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
     'lite-whisper-large-v3-turbo-acc':      { hfId: 'onnx-community/lite-whisper-large-v3-turbo-acc-ONNX',      hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
