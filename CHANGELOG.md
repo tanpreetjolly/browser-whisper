@@ -20,6 +20,9 @@ Dates are npm publish dates in **IST (UTC+5:30)**, taken from the npm registry. 
 - Model-load failures that escaped transformers.js' internal promises (e.g. `RangeError: Array buffer allocation failed` while fetching multi-GB ONNX external data) left loading stuck at 99% forever. The worker now traps unhandled rejections/errors during load and `waitForReady` rejects with a `ModelLoadError`.
 - OPFS caching is now best-effort: a failed cache write logs a warning, removes the partial file, and loading continues from the network response.
 
+### Changed
+- README and the docs API reference now document `TranscribeStream.cancel()`, `TranscribePCMStream.cancel()`, and `BrowserWhisper.dispose()` (#19).
+
 ## [1.2.0] - 2026-10-11
 
 ### Added

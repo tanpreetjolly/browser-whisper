@@ -508,6 +508,23 @@ console.log(segments.map(s => s.text).join(' '))</code></pre>
         <h3><code>BrowserWhisper.clearCache()</code> / <code>deleteModel(model)</code></h3>
         <p>Remove cached model weights from the browser.</p>
 
+        <h3><code>stream.cancel()</code> and <code>whisper.dispose()</code></h3>
+        <p>
+          <code>TranscribeStream.cancel()</code> and <code>TranscribePCMStream.cancel()</code>
+          stop an in-progress transcription and end the async iterator. The loaded
+          Whisper worker stays available for the next call.
+          <code>BrowserWhisper.dispose()</code> terminates that worker. Call it when
+          the instance will not be used again, for example when a component unmounts.
+        </p>
+        <pre><code>const stream = whisper.transcribe(file)
+cancelButton.addEventListener('click', () => stream.cancel())
+
+for await (const { text } of stream) {
+  console.log(text)
+}
+
+whisper.dispose()</code></pre>
+
         <h3><code>TranscriptSegment</code></h3>
         <pre><code>{ text: string, start: number, end: number }</code></pre>
         <p><code>start</code> and <code>end</code> are in seconds from the beginning of the file.</p>
