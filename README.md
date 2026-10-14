@@ -136,10 +136,12 @@ Default: **`whisper-tiny`**. Hybrid quantization (encoder fp32 + decoder q4). We
 | `whisper-base` | ~206 MB | |
 | `whisper-small` | ~586 MB | Better accuracy |
 | `whisper-large-v3-turbo` | ~2.9 GB | Strongest Whisper option |
+| `whisper-{tiny,base,small,large-v3-turbo}_timestamped` | same as base model | Word-level timestamps |
+| `lite-whisper-large-v3-turbo-fast` / `lite-whisper-large-v3-turbo` / `lite-whisper-large-v3-turbo-acc` | ~1.6–2.0 GB | Smaller Large V3 Turbo variants |
 | `moonshine-tiny` / `moonshine-base` | ~55–98 MB | English only |
 | `distil-whisper-small` | ~538 MB | English only |
 | `parakeet-ctc-0.6b` | ~612 MB | English only · NVIDIA Parakeet CTC · lowercase, no punctuation, no timestamps |
-| `parakeet-tdt-0.6b-v3` | ~1.26 GB | **WebGPU only** · NVIDIA Parakeet TDT v3 · 25 European languages (auto-detected) · punctuation + word timestamps |
+| `parakeet-tdt-0.6b-v3` | ~1.26 GB | **WebGPU only** · NVIDIA Parakeet TDT v3 · 25 European languages (auto-detected) · punctuation + word timestamps · fp16 needs `shader-f16`, otherwise pass `quantization: 'q8'` |
 
 ### Parakeet TDT v3
 

@@ -530,6 +530,7 @@ console.log(segments.map(s => s.text).join(' '))</code></pre>
               <tr><td><code>moonshine-tiny</code></td><td>~55 MB</td><td>English only · fastest</td></tr>
               <tr><td><code>moonshine-base</code></td><td>~98 MB</td><td>English only</td></tr>
               <tr><td><code>parakeet-ctc-0.6b</code></td><td>~612 MB</td><td>English only · NVIDIA Parakeet CTC · lowercase, no punctuation, no timestamps</td></tr>
+              <tr><td><code>parakeet-tdt-0.6b-v3</code></td><td>~1.26 GB</td><td><strong>WebGPU only</strong> · NVIDIA Parakeet TDT v3 (CC-BY-4.0) · 25 European languages · punctuation + word timestamps · fp16 needs <code>shader-f16</code>, otherwise use <code>quantization: 'q8'</code></td></tr>
               <tr><td><code>whisper-tiny</code></td><td>~120 MB</td><td>Multilingual · fastest Whisper · default</td></tr>
               <tr><td><code>whisper-base</code></td><td>~206 MB</td><td>Multilingual</td></tr>
               <tr><td><code>whisper-small</code></td><td>~586 MB</td><td>Multilingual · better accuracy</td></tr>
