@@ -24,6 +24,15 @@ interface ParakeetModule {
     fromUrls(cfg: Record<string, unknown>): Promise<ParakeetModel>;
 }
 
+async function hasShaderF16(): Promise<boolean> {
+    const gpu = (navigator as unknown as { gpu?: { requestAdapter(o?: unknown): Promise<{ features: Set<string> } | null> } }).gpu;
+    try {
+        return !!(await gpu?.requestAdapter({ powerPreference: 'high-performance' }))?.features.has('shader-f16');
+    } catch {
+        return false;
+    }
+}
+
 const cache = createOPFSCache({ legacyCacheName: 'transformers-cache' });
 
 /** Returns a blob: URL for `url`, served from OPFS when cached. Reports progress per file. */
@@ -63,6 +72,11 @@ export function createParakeetEngine(): ASREngine {
         async load(config: ModelConfig, device, { quantization, onProgress }) {
             if (device !== 'webgpu') throw new Error('Parakeet TDT runs on WebGPU only');
             const files = parakeetFiles(quantization, String(config.hybridDtype));
+            // Without shader-f16 the fp16 encoder's shaders fail validation and the model
+            // silently returns empty text, so refuse up front.
+            if (files.encoder.includes('fp16') && !(await hasShaderF16())) {
+                throw new Error('Parakeet TDT fp16 needs a WebGPU adapter with the "shader-f16" feature, which this GPU/browser lacks. Try quantization: \'q8\'.');
+            }
             const mod = (await import(/* @vite-ignore */ PARAKEET_JS_URL)) as ParakeetModule;
             const get = (f: string) => cachedBlobUrl(hubUrl(config.hfId, f), f, onProgress);
             try {
@@ -74,9 +88,11 @@ export function createParakeetEngine(): ASREngine {
                 model = await mod.fromUrls({
                     encoderUrl, decoderUrl, tokenizerUrl, encoderDataUrl,
                     filenames: { encoder: files.encoder, decoder: files.decoder },
-                    // Encoder strictly on WebGPU (no silent CPU fallback); parakeet.js always runs
-                    // the small decoder/joint on WASM.
-                    backend: 'webgpu-strict',
+                    // Encoder on WebGPU; parakeet.js always runs the small decoder/joint on WASM.
+                    // 'webgpu-hybrid', not 'webgpu-strict': strict creates both sessions in parallel,
+                    // which races ORT's initWasm() ("multiple calls to 'initWasm()' detected").
+                    // Hybrid lists wasm as a secondary EP, so ops WebGPU can't run fall back per node.
+                    backend: 'webgpu-hybrid',
                     preprocessorBackend: 'js',
                 });
             } catch (err) {
