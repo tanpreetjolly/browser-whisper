@@ -44,6 +44,7 @@ describe('MODELS', () => {
         // The transformers.js 4.x CTC pipeline (_call_wav2vec2) returns { text } only and
         // ignores language / return_timestamps / chunk_length_s.
         expect(MODELS['parakeet-ctc-0.6b']).toEqual({
+            engine: 'transformers',
             hfId: 'onnx-community/parakeet-ctc-0.6b-ONNX',
             hybridDtype: 'q8',
             supportsTimestamps: false,
