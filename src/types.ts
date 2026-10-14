@@ -19,7 +19,12 @@ export type ASRModel =
     | 'parakeet-ctc-0.6b'
     | 'distil-whisper-small';
 
+/** ASR runtime that runs a model (see src/workers/engines). */
+export type EngineId = 'transformers';
+
 export interface ModelConfig {
+    /** ASR engine (runtime) that loads and runs this model */
+    engine: EngineId;
     /** Hugging Face Hub model ID */
     hfId: string;
     /** dtype passed to transformers.js when quantization is 'hybrid' */
@@ -39,26 +44,26 @@ const WORD_TS = { supportsTimestamps: true, supportsWordTimestamps: true };
 const NO_TS = { supportsTimestamps: false, supportsWordTimestamps: false };
 
 export const MODELS: Record<ASRModel, ModelConfig> = {
-    'whisper-tiny':                         { hfId: 'onnx-community/whisper-tiny',                              hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
-    'whisper-base':                         { hfId: 'onnx-community/whisper-base',                              hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
-    'whisper-small':                        { hfId: 'onnx-community/whisper-small',                             hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
-    'whisper-tiny_timestamped':             { hfId: 'onnx-community/whisper-tiny_timestamped',                  hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
-    'whisper-base_timestamped':             { hfId: 'onnx-community/whisper-base_timestamped',                  hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
-    'whisper-small_timestamped':            { hfId: 'onnx-community/whisper-small_timestamped',                 hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
-    'whisper-large-v3-turbo':               { hfId: 'onnx-community/whisper-large-v3-turbo',                    hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
-    'whisper-large-v3-turbo_timestamped':   { hfId: 'onnx-community/whisper-large-v3-turbo_timestamped',        hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
-    'lite-whisper-large-v3-turbo-fast':     { hfId: 'onnx-community/lite-whisper-large-v3-turbo-fast-ONNX',     hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
-    'lite-whisper-large-v3-turbo':          { hfId: 'onnx-community/lite-whisper-large-v3-turbo-ONNX',          hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
-    'lite-whisper-large-v3-turbo-acc':      { hfId: 'onnx-community/lite-whisper-large-v3-turbo-acc-ONNX',      hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
-    'moonshine-tiny':                       { hfId: 'onnx-community/moonshine-tiny-ONNX',                       hybridDtype: 'q4',           ...NO_TS,     supportsLanguage: false },
-    'moonshine-base':                       { hfId: 'onnx-community/moonshine-base-ONNX',                       hybridDtype: 'q4',           ...NO_TS,     supportsLanguage: false },
+    'whisper-tiny':                         { engine: 'transformers', hfId: 'onnx-community/whisper-tiny',                              hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'whisper-base':                         { engine: 'transformers', hfId: 'onnx-community/whisper-base',                              hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'whisper-small':                        { engine: 'transformers', hfId: 'onnx-community/whisper-small',                             hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'whisper-tiny_timestamped':             { engine: 'transformers', hfId: 'onnx-community/whisper-tiny_timestamped',                  hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
+    'whisper-base_timestamped':             { engine: 'transformers', hfId: 'onnx-community/whisper-base_timestamped',                  hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
+    'whisper-small_timestamped':            { engine: 'transformers', hfId: 'onnx-community/whisper-small_timestamped',                 hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
+    'whisper-large-v3-turbo':               { engine: 'transformers', hfId: 'onnx-community/whisper-large-v3-turbo',                    hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'whisper-large-v3-turbo_timestamped':   { engine: 'transformers', hfId: 'onnx-community/whisper-large-v3-turbo_timestamped',        hybridDtype: WHISPER_HYBRID, ...WORD_TS,   supportsLanguage: true  },
+    'lite-whisper-large-v3-turbo-fast':     { engine: 'transformers', hfId: 'onnx-community/lite-whisper-large-v3-turbo-fast-ONNX',     hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'lite-whisper-large-v3-turbo':          { engine: 'transformers', hfId: 'onnx-community/lite-whisper-large-v3-turbo-ONNX',          hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'lite-whisper-large-v3-turbo-acc':      { engine: 'transformers', hfId: 'onnx-community/lite-whisper-large-v3-turbo-acc-ONNX',      hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: true  },
+    'moonshine-tiny':                       { engine: 'transformers', hfId: 'onnx-community/moonshine-tiny-ONNX',                       hybridDtype: 'q4',           ...NO_TS,     supportsLanguage: false },
+    'moonshine-base':                       { engine: 'transformers', hfId: 'onnx-community/moonshine-base-ONNX',                       hybridDtype: 'q4',           ...NO_TS,     supportsLanguage: false },
     // NVIDIA Parakeet CTC 0.6B (FastConformer + CTC head), English only, lowercase output without
     // punctuation. Needs transformers.js >= 4 (`parakeet_ctc`). The CTC pipeline returns text only
     // (no timestamps, ignores chunk_length_s/language), so it relies on our 30 s chunker.
     // Default q8 (model_quantized.onnx + .onnx_data, ~612 MB): q4 and fp16 returned empty text
     // for most inputs under onnxruntime-node CPU; fp32 is 2.4 GB of external data.
-    'parakeet-ctc-0.6b':                    { hfId: 'onnx-community/parakeet-ctc-0.6b-ONNX',                    hybridDtype: 'q8',           ...NO_TS,     supportsLanguage: false },
-    'distil-whisper-small':                 { hfId: 'onnx-community/distil-small.en',                           hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: false },
+    'parakeet-ctc-0.6b':                    { engine: 'transformers', hfId: 'onnx-community/parakeet-ctc-0.6b-ONNX',                    hybridDtype: 'q8',           ...NO_TS,     supportsLanguage: false },
+    'distil-whisper-small':                 { engine: 'transformers', hfId: 'onnx-community/distil-small.en',                           hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: false },
 };
 
 /**

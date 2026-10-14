@@ -9,6 +9,9 @@ Dates are npm publish dates in **IST (UTC+5:30)**, taken from the npm registry. 
 
 ## [Unreleased]
 
+### Changed
+- Internal: ASR runtimes are now pluggable engines (`src/workers/engines/`). The Transformers.js logic moved into a lazily `import()`ed `transformers` engine; each `MODELS` entry names its `engine` (new `ModelConfig.engine` field). No runtime behaviour or public API change.
+
 ### Removed
 - **Breaking (TypeScript):** `whisper-large-v3` is no longer an `ASRModel`. Its fp32 encoder is a single 2.55 GB `encoder_model.onnx_data` file, which browsers can't allocate in one ArrayBuffer (`RangeError: Array buffer allocation failed`), so the model never loaded. Code passing `model: 'whisper-large-v3'` now fails to type-check; plain JS callers get a load error. Use `whisper-large-v3-turbo` instead, ideally with `quantization: 'q4'` or `'fp16'` (its default hybrid mode also loads a 2.55 GB fp32 encoder).
 - The internal `ModelConfig.externalData` override, which only `whisper-large-v3` used. Repos that declare external data in their own `transformers.js_config` are unaffected.

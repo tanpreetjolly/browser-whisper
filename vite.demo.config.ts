@@ -28,7 +28,7 @@ export default defineConfig({
     },
 
     // Workers are ES modules
-    worker: { format: 'es' },
+    worker: { format: 'es', rollupOptions: { output: { inlineDynamicImports: true } } },
 
     server: {
         headers: {
