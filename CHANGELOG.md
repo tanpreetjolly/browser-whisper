@@ -10,6 +10,7 @@ Dates are npm publish dates in **IST (UTC+5:30)**, taken from the npm registry. 
 ## [Unreleased]
 
 ### Added
+- `THIRD_PARTY_NOTICES.md` (shipped in the npm package): licenses, copyright lines, and full texts for bundled code, CDN-loaded runtimes, and every model's weights. `THIRD_PARTY_LICENSES` now points to it. Visible model credits (with the CC BY 4.0 attribution and a note of changes) on the demo, examples, docs and home pages, plus a README Credits section.
 - `parakeet-tdt-0.6b-v3` (NVIDIA Parakeet TDT 0.6B v3, CC-BY-4.0): **WebGPU only**. Multilingual (auto-detected), with punctuation and word timestamps. Runs on a new `parakeet` engine that loads [parakeet.js](https://github.com/ysdede/parakeet.js) from a pinned CDN URL on demand, so it is never bundled.
 
 ### Changed

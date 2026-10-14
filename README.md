@@ -141,7 +141,7 @@ Default: **`whisper-tiny`**. Hybrid quantization (encoder fp32 + decoder q4). We
 | `moonshine-tiny` / `moonshine-base` | ~55–98 MB | English only |
 | `distil-whisper-small` | ~538 MB | English only |
 | `parakeet-ctc-0.6b` | ~612 MB | English only · NVIDIA Parakeet CTC · lowercase, no punctuation, no timestamps |
-| `parakeet-tdt-0.6b-v3` | ~1.26 GB | **WebGPU only** · NVIDIA Parakeet TDT v3 · 25 European languages (auto-detected) · punctuation + word timestamps · fp16 needs `shader-f16`, otherwise pass `quantization: 'q8'` |
+| `parakeet-tdt-0.6b-v3` | ~1.26 GB | **WebGPU only** · NVIDIA Parakeet TDT v3 (CC-BY-4.0) · 25 European languages (auto-detected) · punctuation + word timestamps · fp16 needs `shader-f16`, otherwise pass `quantization: 'q8'` |
 
 ### Parakeet TDT v3
 
@@ -213,3 +213,12 @@ Issues and PRs welcome on [GitHub](https://github.com/tanpreetjolly/browser-whis
 [MIT](https://github.com/tanpreetjolly/browser-whisper/blob/main/LICENSE) © [Tanpreet Singh Jolly](https://github.com/tanpreetjolly)
 
 The MIT License covers the code, not the **browser-whisper** name or logo. Forks and derivatives must keep the copyright notice and use a different name. See [TRADEMARK.md](https://github.com/tanpreetjolly/browser-whisper/blob/main/TRADEMARK.md).
+
+## Credits
+
+- Runtimes: [Transformers.js](https://github.com/huggingface/transformers.js) (Apache-2.0), [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) (MIT), [Mediabunny](https://github.com/vanilagy/mediabunny) (MPL-2.0, bundled unmodified), [parakeet.js](https://github.com/ysdede/parakeet.js) (MIT, loaded on demand).
+- Models (downloaded from Hugging Face, not redistributed):
+  - [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3) and [Parakeet CTC 0.6B](https://huggingface.co/nvidia/parakeet-ctc-0.6b) by **NVIDIA**, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). **Changes:** converted to ONNX and quantized by [istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx) and [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx) (TDT, including the fp16 export), and by [onnx-community](https://huggingface.co/onnx-community/parakeet-ctc-0.6b-ONNX) (CTC).
+  - [Whisper](https://github.com/openai/whisper) by OpenAI (MIT), [Moonshine](https://github.com/moonshine-ai/moonshine) by Useful Sensors (MIT, English models), [Distil-Whisper](https://huggingface.co/distil-whisper/distil-small.en) by Hugging Face (MIT), [Lite-Whisper](https://huggingface.co/efficient-speech/lite-whisper-large-v3-turbo) by efficient-speech (Apache-2.0). ONNX conversions by [onnx-community](https://huggingface.co/onnx-community) / Xenova.
+
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for copyright lines, license texts, and the terms we flagged as unclear.

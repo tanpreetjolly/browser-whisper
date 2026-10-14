@@ -2,7 +2,7 @@
   "name": "browser-whisper",
   "version": "1.2.0",
   "type": "module",
-  "description": "Browser-native audio transcription powered by WebGPU Whisper — zero server, fully local.",
+  "description": "Browser-native audio transcription powered by WebGPU Whisper \u2014 zero server, fully local.",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -15,7 +15,8 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "THIRD_PARTY_NOTICES.md"
   ],
   "scripts": {
     "dev": "bun --bun vite",
