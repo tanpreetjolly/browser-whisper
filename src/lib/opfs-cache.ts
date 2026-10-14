@@ -19,6 +19,8 @@ interface DeleteModelCacheOptions extends OPFSCacheOptions {
 interface CacheLike {
     match(request: RequestInfo | URL): Promise<Response | undefined>;
     put(request: RequestInfo | URL, response: Response): Promise<void>;
+    /** Like put() but consumes `response` directly (no clone/tee buffering). Best-effort. */
+    store(url: string, response: Response): Promise<void>;
 }
 
 const DEFAULT_ROOT_NAME = 'browser-whisper-transformers-cache';
@@ -52,6 +54,10 @@ export function createOPFSCache(options: OPFSCacheOptions): CacheLike {
             // Caching is best-effort: a failed write (quota, OOM, aborted stream) must never
             // reject here, or the model load that triggered it would fail/hang.
             await bestEffortWrite(rootName, key, normalized.url, response.clone());
+        },
+
+        async store(url: string, response: Response): Promise<void> {
+            await bestEffortWrite(rootName, await createCacheKey(url), url, response);
         },
     };
 }

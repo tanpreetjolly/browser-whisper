@@ -9,6 +9,9 @@ Dates are npm publish dates in **IST (UTC+5:30)**, taken from the npm registry. 
 
 ## [Unreleased]
 
+### Added
+- `parakeet-tdt-0.6b-v3` (NVIDIA Parakeet TDT 0.6B v3, CC-BY-4.0): **WebGPU only**. Multilingual (auto-detected), with punctuation and word timestamps. Runs on a new `parakeet` engine that loads [parakeet.js](https://github.com/ysdede/parakeet.js) from a pinned CDN URL on demand, so it is never bundled.
+
 ### Changed
 - Internal: ASR runtimes are now pluggable engines (`src/workers/engines/`). The Transformers.js logic moved into a lazily `import()`ed `transformers` engine; each `MODELS` entry names its `engine` (new `ModelConfig.engine` field). No runtime behaviour or public API change.
 

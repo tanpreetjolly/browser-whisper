@@ -17,17 +17,18 @@ export type ASRModel =
     | 'moonshine-tiny'
     | 'moonshine-base'
     | 'parakeet-ctc-0.6b'
-    | 'distil-whisper-small';
+    | 'distil-whisper-small'
+    | 'parakeet-tdt-0.6b-v3';
 
 /** ASR runtime that runs a model (see src/workers/engines). */
-export type EngineId = 'transformers';
+export type EngineId = 'transformers' | 'parakeet';
 
 export interface ModelConfig {
     /** ASR engine (runtime) that loads and runs this model */
     engine: EngineId;
     /** Hugging Face Hub model ID */
     hfId: string;
-    /** dtype passed to transformers.js when quantization is 'hybrid' */
+    /** dtype used when quantization is 'hybrid' (transformers.js dtype, or the parakeet encoder dtype) */
     hybridDtype: Record<string, string> | string;
     /** Whether the model supports return_timestamps / chunk_length_s / stride_length_s */
     supportsTimestamps: boolean;
@@ -64,6 +65,11 @@ export const MODELS: Record<ASRModel, ModelConfig> = {
     // for most inputs under onnxruntime-node CPU; fp32 is 2.4 GB of external data.
     'parakeet-ctc-0.6b':                    { engine: 'transformers', hfId: 'onnx-community/parakeet-ctc-0.6b-ONNX',                    hybridDtype: 'q8',           ...NO_TS,     supportsLanguage: false },
     'distil-whisper-small':                 { engine: 'transformers', hfId: 'onnx-community/distil-small.en',                           hybridDtype: WHISPER_HYBRID, ...SEGMENT_TS, supportsLanguage: false },
+    // NVIDIA Parakeet TDT 0.6B v3 (25 European languages, auto-detected; punctuation + word
+    // timestamps). Runs via parakeet.js (lazy-loaded from a pinned CDN URL, never bundled).
+    // WebGPU only. 'hybrid' = fp16 encoder (~1.24 GB) + int8 decoder/joint (~18 MB); the fp32
+    // encoder (2.4 GB external data) is avoided because it can hit "Array buffer allocation failed".
+    'parakeet-tdt-0.6b-v3':                 { engine: 'parakeet',     hfId: 'ysdede/parakeet-tdt-0.6b-v3-onnx',                         hybridDtype: 'fp16',         ...WORD_TS,   supportsLanguage: false },
 };
 
 /**

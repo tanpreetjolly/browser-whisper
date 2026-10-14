@@ -139,6 +139,14 @@ Default: **`whisper-tiny`**. Hybrid quantization (encoder fp32 + decoder q4). We
 | `moonshine-tiny` / `moonshine-base` | ~55–98 MB | English only |
 | `distil-whisper-small` | ~538 MB | English only |
 | `parakeet-ctc-0.6b` | ~612 MB | English only · NVIDIA Parakeet CTC · lowercase, no punctuation, no timestamps |
+| `parakeet-tdt-0.6b-v3` | ~1.26 GB | **WebGPU only** · NVIDIA Parakeet TDT v3 · 25 European languages (auto-detected) · punctuation + word timestamps |
+
+### Parakeet TDT v3
+
+`parakeet-tdt-0.6b-v3` runs on a separate engine built on [parakeet.js](https://github.com/ysdede/parakeet.js) (MIT). It needs **WebGPU**: without a WebGPU adapter the model fails to load with a clear error and nothing is downloaded. parakeet.js and its ONNX Runtime are fetched from a pinned jsDelivr URL only when you pick this model, so other models' bundles are unchanged. By default it downloads an fp16 encoder (~1.24 GB) plus an int8 decoder (~18 MB). `quantization: 'fp32'` downloads 2.4 GB of external weights and may fail with `Array buffer allocation failed`. `language` is ignored because the model auto-detects it.
+
+Model: [nvidia/parakeet-tdt-0.6b-v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3) by NVIDIA, licensed under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). ONNX conversion: [istupakov/parakeet-tdt-0.6b-v3-onnx](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx), with the fp16 export from [ysdede/parakeet-tdt-0.6b-v3-onnx](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx).
+
 
 Timestamped, lite, and large-v3-turbo variants are supported too. Full list: [docs — Models](https://whisper.tanpreet.xyz/docs/#models).
 
