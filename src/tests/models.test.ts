@@ -13,8 +13,8 @@ describe('MODELS', () => {
         expect(new Set(ids).size).toBe(ids.length);
     });
 
-    test('every model uses an onnx-community Hugging Face ID', () => {
-        for (const config of Object.values(MODELS)) {
+    test('every transformers.js model uses an onnx-community Hugging Face ID', () => {
+        for (const config of Object.values(MODELS).filter((m) => m.engine === 'transformers')) {
             expect(config.hfId).toStartWith('onnx-community/');
             expect(config.hfId.length).toBeGreaterThan('onnx-community/'.length);
         }

@@ -136,9 +136,19 @@ Default: **`whisper-tiny`**. Hybrid quantization (encoder fp32 + decoder q4). We
 | `whisper-base` | ~206 MB | |
 | `whisper-small` | ~586 MB | Better accuracy |
 | `whisper-large-v3-turbo` | ~2.9 GB | Strongest Whisper option |
+| `whisper-{tiny,base,small,large-v3-turbo}_timestamped` | same as base model | Word-level timestamps |
+| `lite-whisper-large-v3-turbo-fast` / `lite-whisper-large-v3-turbo` / `lite-whisper-large-v3-turbo-acc` | ~1.6–2.0 GB | Smaller Large V3 Turbo variants |
 | `moonshine-tiny` / `moonshine-base` | ~55–98 MB | English only |
 | `distil-whisper-small` | ~538 MB | English only |
 | `parakeet-ctc-0.6b` | ~612 MB | English only · NVIDIA Parakeet CTC · lowercase, no punctuation, no timestamps |
+| `parakeet-tdt-0.6b-v3` | ~1.26 GB | **WebGPU only** · NVIDIA Parakeet TDT v3 (CC-BY-4.0) · 25 European languages (auto-detected) · punctuation + word timestamps · fp16 needs `shader-f16`, otherwise pass `quantization: 'q8'` |
+
+### Parakeet TDT v3
+
+`parakeet-tdt-0.6b-v3` runs on a separate engine built on [parakeet.js](https://github.com/ysdede/parakeet.js) (MIT). It needs **WebGPU**: without a WebGPU adapter the model fails to load with a clear error and nothing is downloaded. parakeet.js and its ONNX Runtime are fetched from a pinned jsDelivr URL only when you pick this model, so other models' bundles are unchanged. By default it downloads an fp16 encoder (~1.24 GB) plus an int8 decoder (~18 MB). `quantization: 'fp32'` downloads 2.4 GB of external weights and may fail with `Array buffer allocation failed`. `language` is ignored because the model auto-detects it.
+
+Model: [nvidia/parakeet-tdt-0.6b-v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3) by NVIDIA, licensed under [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). ONNX conversion: [istupakov/parakeet-tdt-0.6b-v3-onnx](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx), with the fp16 export from [ysdede/parakeet-tdt-0.6b-v3-onnx](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx).
+
 
 Timestamped, lite, and large-v3-turbo variants are supported too. Full list: [docs — Models](https://whisper.tanpreet.xyz/docs/#models).
 
@@ -203,3 +213,12 @@ Issues and PRs welcome on [GitHub](https://github.com/tanpreetjolly/browser-whis
 [MIT](https://github.com/tanpreetjolly/browser-whisper/blob/main/LICENSE) © [Tanpreet Singh Jolly](https://github.com/tanpreetjolly)
 
 The MIT License covers the code, not the **browser-whisper** name or logo. Forks and derivatives must keep the copyright notice and use a different name. See [TRADEMARK.md](https://github.com/tanpreetjolly/browser-whisper/blob/main/TRADEMARK.md).
+
+## Credits
+
+- Runtimes: [Transformers.js](https://github.com/huggingface/transformers.js) (Apache-2.0), [ONNX Runtime Web](https://github.com/microsoft/onnxruntime) (MIT), [Mediabunny](https://github.com/vanilagy/mediabunny) (MPL-2.0, bundled unmodified), [parakeet.js](https://github.com/ysdede/parakeet.js) (MIT, loaded on demand).
+- Models (downloaded from Hugging Face, not redistributed):
+  - [Parakeet TDT 0.6B v3](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3) and [Parakeet CTC 0.6B](https://huggingface.co/nvidia/parakeet-ctc-0.6b) by **NVIDIA**, licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). **Changes:** converted to ONNX and quantized by [istupakov](https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx) and [ysdede](https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx) (TDT, including the fp16 export), and by [onnx-community](https://huggingface.co/onnx-community/parakeet-ctc-0.6b-ONNX) (CTC).
+  - [Whisper](https://github.com/openai/whisper) by OpenAI (MIT), [Moonshine](https://github.com/moonshine-ai/moonshine) by Useful Sensors (MIT, English models), [Distil-Whisper](https://huggingface.co/distil-whisper/distil-small.en) by Hugging Face (MIT), [Lite-Whisper](https://huggingface.co/efficient-speech/lite-whisper-large-v3-turbo) by efficient-speech (Apache-2.0). ONNX conversions by [onnx-community](https://huggingface.co/onnx-community) / Xenova.
+
+See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for copyright lines, license texts, and the terms we flagged as unclear.
