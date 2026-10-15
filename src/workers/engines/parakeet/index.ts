@@ -1,12 +1,7 @@
 /**
- * Parakeet TDT engine backed by parakeet.js (MIT, ysdede) + onnxruntime-web.
- *
- * No bloat: parakeet.js (and its onnxruntime-web) is NOT bundled. It is imported at runtime
- * from a version-pinned jsDelivr URL only when a parakeet model loads, so Whisper/CTC users
- * download nothing extra. transformers.js already fetches its ORT WASM from jsDelivr the same way.
- *
- * Model files are streamed into the shared OPFS cache (no in-memory copy) and handed to
- * parakeet.js as file-backed blob: URLs.
+ * Parakeet TDT via parakeet.js. The runtime is imported from a pinned CDN URL only when a
+ * Parakeet model loads, so it never ships in the bundle. Model files are streamed into OPFS
+ * and passed as file-backed blob: URLs to avoid holding a second copy in memory.
  */
 import { createOPFSCache } from '../../../lib/opfs-cache.js';
 import type { ASREngine, EngineLoadContext } from '../types.js';
@@ -25,7 +20,6 @@ interface ParakeetModule {
 
 const cache = createOPFSCache({ legacyCacheName: 'transformers-cache' });
 
-/** Returns a blob: URL for `url`, served from OPFS when cached. Reports progress per file. */
 async function cachedBlobUrl(url: string, file: string, ctx: EngineLoadContext): Promise<string> {
     ctx.onFile(file, 0, 0);
     let res = await cache.match(url);
@@ -44,7 +38,7 @@ async function cachedBlobUrl(url: string, file: string, ctx: EngineLoadContext):
         const stream = new Response(counted, { headers: net.headers });
         await cache.store(url, stream);
         res = await cache.match(url);
-        // OPFS unavailable/full: fall back to an in-memory copy (one more download).
+        // OPFS unavailable or full: fall back to a second, in-memory download.
         if (!res) res = await fetch(url, { signal: ctx.signal });
     }
     const blob = await res.blob();
@@ -62,8 +56,7 @@ export function createEngine(): ASREngine<ParakeetConfig> {
         async load({ engineConfig }, ctx) {
             if (ctx.device !== 'webgpu') throw new Error('Parakeet TDT runs on WebGPU only');
             const files = parakeetFiles(ctx.quantization, engineConfig.hybridEncoder);
-            // Without shader-f16 the fp16 encoder's shaders fail validation and the model
-            // silently returns empty text, so refuse up front.
+            // Without shader-f16 the fp16 encoder silently returns empty text; fail loudly instead.
             if (files.encoder.includes('fp16') && !ctx.adapterFeatures.has('shader-f16')) {
                 throw new Error('Parakeet TDT fp16 needs a WebGPU adapter with the "shader-f16" feature, which this GPU/browser lacks. Try quantization: \'q8\'.');
             }
@@ -78,10 +71,8 @@ export function createEngine(): ASREngine<ParakeetConfig> {
                 model = await mod.fromUrls({
                     encoderUrl, decoderUrl, tokenizerUrl, encoderDataUrl,
                     filenames: { encoder: files.encoder, decoder: files.decoder },
-                    // Encoder on WebGPU; parakeet.js always runs the small decoder/joint on WASM.
-                    // 'webgpu-hybrid', not 'webgpu-strict': strict creates both sessions in parallel,
-                    // which races ORT's initWasm() ("multiple calls to 'initWasm()' detected").
-                    // Hybrid lists wasm as a secondary EP, so ops WebGPU can't run fall back per node.
+                    // Not 'webgpu-strict': it creates both sessions in parallel and races ORT's
+                    // initWasm() ("multiple calls to 'initWasm()' detected").
                     backend: 'webgpu-hybrid',
                     preprocessorBackend: 'js',
                 });
@@ -89,8 +80,7 @@ export function createEngine(): ASREngine<ParakeetConfig> {
                 revoke();
                 throw err;
             }
-            // Session creation has read the model bytes; the blob URLs are no longer needed.
-            revoke();
+            revoke(); // sessions have read the bytes
         },
 
         async transcribe(samples) {

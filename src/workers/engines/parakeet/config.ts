@@ -1,4 +1,4 @@
-/** Pure helpers for the parakeet engine (no runtime imports, unit-tested). */
+/** Parakeet engine helpers. No runtime imports, so tests can load this file. */
 import type { QuantizationType } from '../../../types.js';
 import type { EngineDescriptor, TimedText } from '../types.js';
 
@@ -17,7 +17,7 @@ export const parakeetEngine: EngineDescriptor<ParakeetConfig> = {
     legacyHybridDtype: (c) => c.hybridEncoder,
 };
 
-/** parakeet.js version loaded at runtime. Pinned: bump deliberately. */
+/** Pinned: the CDN import is not covered by the lockfile. */
 export const PARAKEET_JS_VERSION = '1.4.4';
 export const PARAKEET_JS_URL = `https://cdn.jsdelivr.net/npm/parakeet.js@${PARAKEET_JS_VERSION}/+esm`;
 
@@ -30,10 +30,8 @@ export interface ParakeetFiles {
 }
 
 /**
- * Files to fetch for a quantization. 'hybrid' (default) and 'fp16' use the single-file fp16
- * encoder (~1.24 GB), which stays below browsers' ~2 GB ArrayBuffer limit. 'fp32' pulls 2.4 GB
- * of external data and may fail with "Array buffer allocation failed". The decoder/joint is
- * always int8 (~18 MB; parakeet.js runs it on WASM).
+ * fp16 (the 'hybrid' default) is a single 1.24 GB file, under the ~2 GB ArrayBuffer limit;
+ * fp32 adds 2.4 GB of external data and can fail to allocate.
  */
 export function parakeetFiles(quantization: QuantizationType, hybridDtype: string): ParakeetFiles {
     const q = quantization === 'hybrid' ? hybridDtype : quantization;
@@ -50,7 +48,6 @@ export function hubUrl(repo: string, file: string): string {
     return `https://huggingface.co/${repo}/resolve/main/${file}`;
 }
 
-/** parakeet.js word timings → neutral words (chunk-relative seconds). */
 export function toWords(words: { text: string; start_time: number; end_time: number }[] | undefined): TimedText[] {
     return (words ?? []).map((w) => ({ text: w.text, start: w.start_time, end: w.end_time }));
 }

@@ -50,10 +50,8 @@ export const MODEL_DEFINITIONS = {
     // for most inputs under onnxruntime-node CPU; fp32 is 2.4 GB of external data.
     'parakeet-ctc-0.6b': tjs('onnx-community/parakeet-ctc-0.6b-ONNX', 'q8', NO_TS, NO_LANG),
     'distil-whisper-small': tjs('onnx-community/distil-small.en', WHISPER_HYBRID, SEGMENT_TS, NO_LANG),
-    // NVIDIA Parakeet TDT 0.6B v3 (25 European languages, auto-detected; punctuation + word
-    // timestamps). Runs via parakeet.js (lazy-loaded from a pinned CDN URL, never bundled).
-    // WebGPU only. 'hybrid' = fp16 encoder (~1.24 GB) + int8 decoder/joint (~18 MB); the fp32
-    // encoder (2.4 GB external data) is avoided because it can hit "Array buffer allocation failed".
+    // WebGPU only. 'hybrid' uses the fp16 encoder: fp32 needs 2.4 GB of external data, which
+    // fails with "Array buffer allocation failed" in browsers.
     'parakeet-tdt-0.6b-v3': { engine: 'parakeet', capabilities: { ...WORD_TS, language: false }, engineConfig: { repo: 'ysdede/parakeet-tdt-0.6b-v3-onnx', hybridEncoder: 'fp16' } },
 } satisfies Record<string, ModelDefinition>;
 
