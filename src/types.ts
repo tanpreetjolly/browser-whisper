@@ -14,13 +14,12 @@ export { MODELS } from './models.js';
 export interface ModelConfig {
     /** ASR engine (runtime) that loads and runs this model */
     engine: EngineId;
-    /** What the model can do (engine-neutral) */
     capabilities: ModelCapabilities;
-    /** Engine-owned configuration (shape depends on `engine`) */
+    /** Shape depends on `engine` */
     engineConfig: unknown;
-    /** @deprecated Use the engine's config. Hub id used for caching (same as before for every model). */
+    /** @deprecated Use `engineConfig`. */
     hfId: string;
-    /** @deprecated Engine-specific; dtype used when quantization is 'hybrid'. */
+    /** @deprecated Use `engineConfig`. */
     hybridDtype: Record<string, string> | string;
     /** @deprecated Use `capabilities.timestamps`. */
     supportsTimestamps: boolean;
@@ -136,7 +135,6 @@ export type DecoderMessage =
 export type ASRWorkerMessage =
     | { type: 'init'; runId: number; model: ASRModel; language?: string; quantization?: QuantizationType }
     | { type: 'port'; runId: number; port: MessagePort }
-    /** Stop a run: drop its queued chunks, abort its signal, and suppress any further output */
     | { type: 'cancel'; runId: number };
 
 // — Messages sent FROM workers TO the main thread —
@@ -147,6 +145,6 @@ export type MainThreadMessage = (
     | { type: 'done' }
     | { type: 'error'; message: string; /** Set when the error happened while loading this model (Hub ID). */ loadModelId?: string }
 ) & {
-    /** ASR worker messages carry the run they belong to; the main thread ignores other runs. */
+    /** Lets the main thread drop output from cancelled runs (#34). */
     runId?: number;
 };

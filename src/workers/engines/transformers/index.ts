@@ -1,4 +1,3 @@
-/** Transformers.js engine runtime: Whisper, Moonshine, Distil-Whisper, Parakeet CTC. */
 import { pipeline, env } from '@huggingface/transformers';
 import { createOPFSCache } from '../../../lib/opfs-cache.js';
 import type { ASREngine, ModelCapabilities } from '../types.js';
@@ -28,8 +27,7 @@ export function createEngine(): ASREngine<TransformersConfig> {
 
     return {
         async load({ engineConfig, capabilities }, { device, quantization, onFile }) {
-            // transformers.js has no AbortSignal for pipeline() downloads; cancel/abort of a
-            // download is handled by terminating the worker (BrowserWhisper.downloadModel).
+            // pipeline() takes no AbortSignal; downloadModel aborts by terminating the worker.
             setupEnv();
             const dtype = quantization === 'hybrid' ? engineConfig.hybridDtype : quantization;
             asr = (await (pipeline as (...a: unknown[]) => Promise<unknown>)(

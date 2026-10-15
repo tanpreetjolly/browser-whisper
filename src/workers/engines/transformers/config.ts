@@ -1,10 +1,7 @@
-/** Transformers.js engine descriptor + config (pure: no runtime imports). */
 import type { EngineDescriptor } from '../types.js';
 
 export interface TransformersConfig {
-    /** Hugging Face repo id */
     hfId: string;
-    /** transformers.js dtype used for quantization 'hybrid' */
     hybridDtype: Record<string, string> | string;
 }
 

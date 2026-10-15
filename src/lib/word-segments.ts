@@ -69,11 +69,7 @@ export function groupWordsIntoSegments(words: WordTimestamp[]): TranscriptSegmen
     return segments;
 }
 
-/**
- * Turn one engine result (chunk-relative times) into file-relative segments for a PCM chunk.
- * Every branch (words, segments, text-only models such as Parakeet CTC) is clamped to the
- * chunk's real audio end, because the final chunk is zero-padded to a 30 s window.
- */
+/** Clamps to the chunk's real audio end: the final chunk is zero-padded to 30 s. */
 export function buildSegments(
     result: EngineResult,
     chunk: Pick<PCMChunk, 'timestamp' | 'samples' | 'duration'>,

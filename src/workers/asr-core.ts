@@ -1,16 +1,7 @@
 /**
- * asr-core.ts
- *
- * Engine-agnostic ASR worker logic, separated from the `self` wiring (asr-worker.ts) so it can
- * be contract-tested with fake engines:
- *  1. Validate the request (model, quantization) and resolve the model's engine
- *  2. Load the engine lazily, WebGPU first with WASM fallback, aggregating download progress
- *  3. Receive mono 16 kHz PCMChunks from the decoder via MessagePort and transcribe them in order
- *  4. Build file-relative, clamped TranscriptSegments and post them back
- *
- * Runs: every request carries a `runId`. Starting a run or `cancel` drops queued chunks of other
- * runs and aborts their AbortSignal, and every outgoing message is tagged with the run it belongs
- * to, so a cancelled run can never leak segments or `done` into the next one (#34).
+ * Engine-agnostic ASR worker, kept apart from the `self` wiring so it can be tested with fake
+ * engines. Every message carries a runId: a cancelled or superseded run must never leak
+ * segments or `done` into the next one on a reused worker (#34).
  */
 import type { ASRWorkerMessage, MainThreadMessage, PCMChunk, QuantizationType } from '../types.js';
 import { MODEL_DEFINITIONS, type ModelDefinition } from '../models.js';
@@ -24,9 +15,8 @@ import type { ASREngine, EngineDescriptor } from './engines/types.js';
 
 export interface ASRWorkerHost {
     post(msg: MainThreadMessage): void;
-    /** Where escaped errors / unhandled rejections are observed (the worker global). */
     fatalTarget: EventTarget;
-    // Injection points (tests); default to the real tables.
+    // Test seams.
     definitions?: Record<string, ModelDefinition>;
     engines?: Record<string, EngineDescriptor<never>>;
     runtimes?: Record<string, RuntimeFactory>;
@@ -62,7 +52,6 @@ export function createASRWorker(host: ASRWorkerHost): (msg: ASRWorkerMessage) =>
 
     const post = (runId: number, msg: MainThreadMessage) => host.post({ ...msg, runId });
 
-    /** Make `runId` the active run, discarding everything from previous runs. */
     function activate(runId: number): void {
         if (activeRun === runId) return;
         controller.abort(new DOMException('Superseded by a new run', 'AbortError'));
@@ -106,12 +95,10 @@ export function createASRWorker(host: ASRWorkerHost): (msg: ASRWorkerMessage) =>
                 tracker({ status: 'progress', file, loaded: bytes, total });
             };
 
-            // Guard the whole load: an error escaping an engine's internal promises would
-            // otherwise leave this await pending forever (UI stuck at 99%).
+            // Errors escaping an engine's promise chains would otherwise hang the load at 99%.
             const engine = await fatalErrors.guard((async () => {
-                // Probe the adapter *before* asking any engine for WebGPU: transformers.js 4.x
-                // chains every InferenceSession.create() on one promise, so a rejected WebGPU
-                // session would poison the WASM fallback.
+                // Probe first: transformers.js 4.x chains all session creates on one promise, so a
+                // rejected WebGPU session would poison the WASM fallback.
                 const wantsGpu = desc.devices.includes('webgpu');
                 const adapter = wantsGpu ? await getAdapter() : null;
                 if (wantsGpu && !adapter && desc.devices.includes('wasm')) {
@@ -121,7 +108,7 @@ export function createASRWorker(host: ASRWorkerHost): (msg: ASRWorkerMessage) =>
                 if (plan.length === 0) {
                     throw new Error(`Model "${model}" requires WebGPU, but no WebGPU adapter is available in this browser.`);
                 }
-                // Only now fetch/evaluate the runtime, so an unsupported browser never downloads it.
+                // Unsupported browsers never download the runtime.
                 const next = await runtime();
                 for (let i = 0; i < plan.length; i++) {
                     try {
@@ -147,7 +134,7 @@ export function createASRWorker(host: ASRWorkerHost): (msg: ASRWorkerMessage) =>
 
             loaded = { engine, model, quantization, def };
 
-            // Pre-warm (compiles WebGPU shaders; hides a 1-5 s cold start).
+            // Compiles WebGPU shaders now, hiding a 1-5 s first-chunk stall.
             post(runId, { type: 'progress', event: { stage: 'loading', progress: 0.99 } });
             try {
                 await fatalErrors.guard(engine.transcribe(new Float32Array(1600), { signal }));
@@ -174,7 +161,7 @@ export function createASRWorker(host: ASRWorkerHost): (msg: ASRWorkerMessage) =>
             warn(`[browser-whisper] Model "${model}" does not support the language option; "${language}" is ignored.`);
         }
 
-        // Serialize loads so overlapping inits never race on the shared engine.
+        // Overlapping inits would otherwise race on the shared engine.
         const job = loadChain.then(() => load(runId, model, quantization, signal));
         loadChain = job.catch(() => {});
         try {
@@ -220,7 +207,7 @@ export function createASRWorker(host: ASRWorkerHost): (msg: ASRWorkerMessage) =>
             signal,
             ...(def.capabilities.language && language ? { language } : {}),
         });
-        // Cancelled (or superseded) while the engine was busy: drop the result.
+        // Engines can't always abort mid-inference; drop late results instead.
         if (signal.aborted || runId !== activeRun) return;
         for (const segment of buildSegments(result, chunk)) post(runId, { type: 'segment', segment });
         post(runId, { type: 'progress', event: { stage: 'transcribing', progress: 1 } });

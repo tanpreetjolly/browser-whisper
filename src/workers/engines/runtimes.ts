@@ -1,8 +1,4 @@
-/**
- * Worker-only runtime registry. Each runtime is reached only through a dynamic import, so it is
- * evaluated only when a model that names it loads. Typed against the catalog, so a new engine
- * id without a runtime fails typecheck.
- */
+/** Worker-only. Dynamic imports keep unused runtimes from being evaluated. */
 import type { EngineId } from './catalog.js';
 import type { ASREngine } from './types.js';
 

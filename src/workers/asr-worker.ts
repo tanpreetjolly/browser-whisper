@@ -1,7 +1,4 @@
-/**
- * asr-worker.ts: Web Worker entry. All logic lives in asr-core.ts (engine-agnostic,
- * contract-tested); engines are loaded lazily from src/workers/engines.
- */
+/** Worker entry; logic lives in asr-core.ts. */
 import type { ASRWorkerMessage, MainThreadMessage } from '../types.js';
 import { createASRWorker } from './asr-core.js';
 

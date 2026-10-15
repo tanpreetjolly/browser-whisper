@@ -1,13 +1,12 @@
 /**
- * Bundle-size budget for the published library (run after `bun run build`).
- * Budgets are ~5% above the size when they were set. Raise them deliberately, in the PR that
- * needs it, with a note on why (a new engine must lazy-load, not grow the default worker).
+ * ~5% headroom over the size when set. Raise only with a justification in the PR: new
+ * engines should lazy-load rather than grow the default worker.
  */
 import { readFileSync } from 'node:fs';
 import { gzipSync } from 'node:zlib';
 
 const BUDGETS: Record<string, { raw: number; gzip: number }> = {
-    // 2026-10: 1,334,266 B raw / 312,476 B gzip (inlined worker blobs incl. transformers.js)
+    // Set 2026-10 at 1,334,266 B raw / 312,476 B gzip.
     'dist/index.js': { raw: 1_400_000, gzip: 330_000 },
 };
 

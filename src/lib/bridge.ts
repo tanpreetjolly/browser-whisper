@@ -52,7 +52,6 @@ export interface BridgeOptions {
 }
 
 let lastRunId = 0;
-/** Unique id for one request to an ASR worker; its replies carry it back (see asr-core.ts). */
 export function nextRunId(): number {
     return ++lastRunId;
 }
@@ -176,13 +175,11 @@ export class Bridge {
         if (this.ownsWhisperWorker) {
             this.whisperWorker.terminate();
         } else {
-            // Shared (reusable) worker: stop this run so its queued chunks and in-flight
-            // results never reach the next transcribe() on the same instance (#34).
+            // Reused worker: without this, queued chunks leak into the next run (#34).
             this.whisperWorker.postMessage({ type: 'cancel', runId: this.runId });
         }
     }
 
-    /** Messages tagged with another run (e.g. a cancelled one) are ignored. */
     private isOwnRun(msg: MainThreadMessage): boolean {
         return msg.runId === undefined || msg.runId === this.runId;
     }

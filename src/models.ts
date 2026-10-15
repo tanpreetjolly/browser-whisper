@@ -1,10 +1,4 @@
-/**
- * Model definitions. Each model names its engine, declares engine-neutral capabilities, and
- * carries an engine-owned `engineConfig` (typed per engine via the catalog).
- *
- * `ASRModel` is derived from this table. The public `MODELS` map adds the deprecated flat
- * fields (`hfId`, `hybridDtype`, `supports*`) so existing code keeps working.
- */
+/** `ASRModel` is derived from MODEL_DEFINITIONS; `engineConfig` is typed per engine. */
 import type { ModelConfig } from './types.js';
 import { ENGINES, type EngineConfigOf, type EngineId } from './workers/engines/catalog.js';
 import type { ModelCapabilities } from './workers/engines/types.js';
@@ -43,11 +37,8 @@ export const MODEL_DEFINITIONS = {
     'lite-whisper-large-v3-turbo-acc': tjs('onnx-community/lite-whisper-large-v3-turbo-acc-ONNX', WHISPER_HYBRID, SEGMENT_TS, LANG),
     'moonshine-tiny': tjs('onnx-community/moonshine-tiny-ONNX', 'q4', NO_TS, NO_LANG),
     'moonshine-base': tjs('onnx-community/moonshine-base-ONNX', 'q4', NO_TS, NO_LANG),
-    // NVIDIA Parakeet CTC 0.6B (FastConformer + CTC head), English only, lowercase output without
-    // punctuation. Needs transformers.js >= 4 (`parakeet_ctc`). The CTC pipeline returns text only
-    // (no timestamps, ignores chunk_length_s/language), so it relies on our 30 s chunker.
-    // Default q8 (model_quantized.onnx + .onnx_data, ~612 MB): q4 and fp16 returned empty text
-    // for most inputs under onnxruntime-node CPU; fp32 is 2.4 GB of external data.
+    // Text only: the CTC pipeline ignores timestamps/chunking, so it relies on our 30 s chunker.
+    // q8 because q4 and fp16 returned empty text for most inputs; fp32 is 2.4 GB external data.
     'parakeet-ctc-0.6b': tjs('onnx-community/parakeet-ctc-0.6b-ONNX', 'q8', NO_TS, NO_LANG),
     'distil-whisper-small': tjs('onnx-community/distil-small.en', WHISPER_HYBRID, SEGMENT_TS, NO_LANG),
     // WebGPU only. 'hybrid' uses the fp16 encoder: fp32 needs 2.4 GB of external data, which
@@ -55,7 +46,6 @@ export const MODEL_DEFINITIONS = {
     'parakeet-tdt-0.6b-v3': { engine: 'parakeet', capabilities: { ...WORD_TS, language: false }, engineConfig: { repo: 'ysdede/parakeet-tdt-0.6b-v3-onnx', hybridEncoder: 'fp16' } },
 } satisfies Record<string, ModelDefinition>;
 
-/** All model ids accepted by the API. */
 export type ASRModel = keyof typeof MODEL_DEFINITIONS;
 
 export function toModelConfig(def: ModelDefinition): ModelConfig {
@@ -75,7 +65,7 @@ export function toModelConfig(def: ModelDefinition): ModelConfig {
     };
 }
 
-/** Public model table (backward compatible). */
+/** Public table; keeps the deprecated flat fields for backward compatibility. */
 export const MODELS = Object.fromEntries(
     Object.entries(MODEL_DEFINITIONS).map(([id, def]) => [id, toModelConfig(def)]),
 ) as Record<ASRModel, ModelConfig>;

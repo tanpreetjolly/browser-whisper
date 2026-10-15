@@ -3,13 +3,11 @@ import type { QuantizationType } from '../../../types.js';
 import type { EngineDescriptor, TimedText } from '../types.js';
 
 export interface ParakeetConfig {
-    /** Hugging Face repo with parakeet.js-layout ONNX files */
     repo: string;
-    /** Encoder dtype used for quantization 'hybrid' */
     hybridEncoder: 'fp16' | 'q8' | 'fp32';
 }
 
-// WebGPU only: the owner does not ship models that can't run on WebGPU.
+// WebGPU only by project policy.
 export const parakeetEngine: EngineDescriptor<ParakeetConfig> = {
     devices: ['webgpu'],
     quantizations: ['hybrid', 'fp16', 'q8', 'fp32'],

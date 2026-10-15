@@ -1,37 +1,24 @@
-/**
- * Engine contracts. Everything here is engine-neutral: the shared worker (asr-worker.ts /
- * asr-core.ts) and src/lib never see a runtime's own types or data shapes.
- *
- * Each engine lives in src/workers/engines/<id>/ with:
- *  - config.ts: a pure EngineDescriptor (safe to import on the main thread, no runtime deps)
- *  - index.ts:  the runtime, exporting `createEngine()`; reached only via runtimes.ts (dynamic import)
- */
+/** Engine contracts. Engine-neutral by design: shared code never sees runtime types. See CONTRIBUTING.md. */
 import type { QuantizationType } from '../../types.js';
 
 export type EngineDevice = 'webgpu' | 'wasm';
 
-/** What a model can do. Shared code (segment building, warnings) relies only on this. */
+/** What a model can do. */
 export interface ModelCapabilities {
-    /** Returns segment-level timestamps */
     timestamps: boolean;
-    /** Returns word-level timestamps */
     wordTimestamps: boolean;
     /** Honours the `language` option */
     language: boolean;
 }
 
-/** A timed span relative to the start of the chunk passed to transcribe(). */
+/** Seconds relative to the chunk passed to transcribe(). */
 export interface TimedText {
     text: string;
     start: number;
     end: number;
 }
 
-/**
- * Engine-neutral transcription result, chunk-relative seconds. Provide `words` when the
- * model has word timings (they get grouped into segments), else `segments`, else just `text`
- * (one segment spanning the chunk's real audio).
- */
+/** Prefer `words` (grouped into segments), else `segments`; text-only spans the chunk. */
 export interface EngineResult {
     text: string;
     words?: TimedText[];
@@ -41,38 +28,35 @@ export interface EngineResult {
 export interface EngineLoadContext {
     device: EngineDevice;
     quantization: QuantizationType;
-    /** WebGPU adapter features (e.g. 'shader-f16'); empty when not on WebGPU */
+    /** Empty unless device is 'webgpu' */
     adapterFeatures: ReadonlySet<string>;
-    /** Report bytes for one file; the worker aggregates all files into one bar. total=0 when unknown. */
+    /** total = 0 when unknown */
     onFile(file: string, loaded: number, total: number): void;
-    /** Aborted when the load is cancelled (engines should stop downloading if they can). */
     signal: AbortSignal;
 }
 
 export interface TranscribeContext {
-    /** Only set when the model's capabilities.language is true */
+    /** Only set when capabilities.language */
     language?: string;
-    /** Aborted when the run is cancelled; results after abort are discarded anyway. */
+    /** Results after abort are discarded anyway. */
     signal: AbortSignal;
 }
 
-/** A loaded runtime for one model. `C` is the engine's own config type. */
 export interface ASREngine<C = unknown> {
-    /** Load `model` on ctx.device. Reject on failure so the worker can try the next device. */
+    /** Reject on failure so the worker can fall back to the next device. */
     load(model: { id: string; engineConfig: C; capabilities: ModelCapabilities }, ctx: EngineLoadContext): Promise<void>;
     transcribe(samples: Float32Array, ctx: TranscribeContext): Promise<EngineResult>;
     /** Free model / GPU memory. Must not throw. */
     dispose(): void | Promise<void>;
 }
 
-/** Pure, main-thread-safe description of an engine (lives in engines/<id>/config.ts). */
+/** Must stay free of runtime imports: the main thread loads it. */
 export interface EngineDescriptor<C = unknown> {
-    /** Supported devices; the worker tries WebGPU first, then WASM, among these. */
     devices: readonly EngineDevice[];
-    /** Quantizations this engine accepts (validated before anything is downloaded). */
+    /** Validated before any download */
     quantizations: readonly QuantizationType[];
-    /** Hugging Face-style id used for cache lookup/deletion and error messages. */
+    /** Cache key; must not change, or existing OPFS caches are orphaned */
     cacheId(config: C): string;
-    /** Legacy flat `ModelConfig.hybridDtype` value, kept for backward compatibility. */
+    /** Backs the deprecated `ModelConfig.hybridDtype` */
     legacyHybridDtype(config: C): Record<string, string> | string;
 }
