@@ -17,7 +17,7 @@ export const ENGINES: Record<EngineId, EngineEntry> = {
         devices: ['webgpu', 'wasm'],
         create: () => import('./transformers/index.js').then((m) => m.createTransformersEngine()),
     },
-    // WebGPU only: the owner does not ship models that can't run on WebGPU.
+    // WebGPU only by project policy.
     parakeet: {
         devices: ['webgpu'],
         create: () => import('./parakeet/index.js').then((m) => m.createParakeetEngine()),

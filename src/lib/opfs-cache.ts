@@ -19,7 +19,7 @@ interface DeleteModelCacheOptions extends OPFSCacheOptions {
 interface CacheLike {
     match(request: RequestInfo | URL): Promise<Response | undefined>;
     put(request: RequestInfo | URL, response: Response): Promise<void>;
-    /** Like put() but consumes `response` directly (no clone/tee buffering). Best-effort. */
+    /** Like put() but consumes `response` without a clone; tee would buffer GB-sized models. */
     store(url: string, response: Response): Promise<void>;
 }
 
