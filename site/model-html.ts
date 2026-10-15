@@ -1,7 +1,6 @@
-/** Renders model lists for the site from MODELS + MODEL_META (used by the Vite html plugin). */
 import { MODELS, type ASRModel } from '../src/types';
 
-// Display order = MODEL_META key order (MODEL_META is typed Record<ASRModel, …>, so it covers MODELS).
+// Picker order is MODEL_META key order.
 import { CREDITS, GROUPS, HOME_MODELS, MODEL_META, type CreditId } from './model-meta';
 
 const ids = () => Object.keys(MODEL_META) as ASRModel[];
@@ -23,7 +22,6 @@ export function renderOptions(opts: { selected?: string; sizes?: boolean; indent
     return out.join('\n');
 }
 
-/** Docs table rows: model · size · notes (picker order). */
 export function renderDocsRows(indent = ''): string {
     return orderedIds().map((id) => {
         const m = MODEL_META[id];
@@ -31,7 +29,6 @@ export function renderDocsRows(indent = ''): string {
     }).join('\n');
 }
 
-/** Home language table rows, in HOME_MODELS order. */
 export function renderHomeRows(indent = ''): string {
     return HOME_MODELS.map((id) => {
         if (!MODEL_META[id].languages) throw new Error(`HOME_MODELS entry ${id} has no languages`);
@@ -54,10 +51,7 @@ function orderedIds(): ASRModel[] {
     return GROUPS.flatMap((g) => ids().filter((id) => MODEL_META[id].group === g));
 }
 
-/**
- * Replaces `<!-- @models:NAME key=value ... -->` markers. NAME is options | docs-rows |
- * home-rows | credits. Options takes `selected=<id>` and `sizes=false`.
- */
+/** Expands `<!-- @models:options|docs-rows|home-rows|credits [selected=<id>] [sizes=false] -->`. */
 export function expandModelMarkers(html: string): string {
     return html.replace(/^([ \t]*)<!-- @models:([a-z-]+)((?: [a-z]+=[^\s>]+)*) -->/gm, (_m, indent: string, name: string, rawArgs: string) => {
         const args = Object.fromEntries(rawArgs.trim().split(/\s+/).filter(Boolean).map((kv) => kv.split('=')));

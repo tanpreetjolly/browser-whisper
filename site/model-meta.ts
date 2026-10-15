@@ -1,21 +1,17 @@
 /**
- * Display metadata for every model in MODELS. The site build generates the demo/example
- * pickers, the docs/home model tables and the credits blocks from this map (see
- * site/model-html.ts), so a model added to MODELS fails typecheck until it has an entry here.
- * HTML is allowed in `notes`, `languages` and credit `html`.
+ * Source for every generated model list on the site. Typed against ASRModel, so a new model
+ * fails typecheck until it has an entry. `notes`, `languages` and credits may contain HTML.
  */
 import type { ASRModel } from '../src/types';
 
 export type CreditId = 'openai' | 'lite' | 'moonshine' | 'distil' | 'nvidia-ctc' | 'nvidia-tdt';
 
 export interface ModelMeta {
-    /** <optgroup> label (picker order follows GROUPS) */
     group: string;
     label: string;
     size: string;
-    /** Docs table "Notes" column */
     notes: string;
-    /** Home-page languages column (required for models in HOME_MODELS) */
+    /** Required for models in HOME_MODELS */
     languages?: string;
     credit: CreditId;
 }
@@ -52,7 +48,7 @@ export const MODEL_META: Record<ASRModel, ModelMeta> = {
     'distil-whisper-small':  { group: GROUPS[6], label: 'Distil Whisper Small', size: '~538 MB', notes: 'English only · Distil', languages: EN, credit: 'distil' },
 };
 
-/** Home-page language table: the models listed and their order (each needs `languages`). */
+/** Curated subset and order for the home page table. */
 export const HOME_MODELS: ASRModel[] = [
     'whisper-tiny', 'whisper-base', 'whisper-small', 'moonshine-tiny', 'moonshine-base',
     'distil-whisper-small', 'parakeet-ctc-0.6b', 'parakeet-tdt-0.6b-v3',
@@ -61,7 +57,7 @@ export const HOME_MODELS: ASRModel[] = [
 const a = (href: string, text: string) => `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
 const CC_BY = a('https://creativecommons.org/licenses/by/4.0/', 'CC BY 4.0');
 
-/** Credit sentences, in display order. Only credits used by some model are rendered. */
+/** Only credits referenced by a model are rendered. */
 export const CREDITS: Record<CreditId, string> = {
     'nvidia-tdt': `${a('https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3', 'Parakeet TDT 0.6B v3')} by NVIDIA, licensed under ${CC_BY}. Changes: converted to ONNX and quantized by ${a('https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx', 'istupakov')}/${a('https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx', 'ysdede')}; runs with ${a('https://github.com/ysdede/parakeet.js', 'parakeet.js')} (MIT).`,
     'nvidia-ctc': `${a('https://huggingface.co/nvidia/parakeet-ctc-0.6b', 'Parakeet CTC 0.6B')} by NVIDIA, licensed under ${CC_BY}. Changes: converted to ONNX and quantized by ${a('https://huggingface.co/onnx-community', 'onnx-community')}.`,
