@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { Chunker } from '../lib/chunker.js';
 import { buildSegments } from '../lib/word-segments.js';
-import { MODELS, type PCMChunk } from '../types.js';
+import type { PCMChunk } from '../types.js';
 
 /** Run PCM through the real decoder-side path: Chunker -> MessagePort transfer -> worker receive */
 async function throughPort(samples: Float32Array): Promise<PCMChunk[]> {
@@ -23,34 +23,31 @@ async function throughPort(samples: Float32Array): Promise<PCMChunk[]> {
 }
 
 describe('text-only (CTC) segment end on the real chunk path', () => {
-    const ctc = MODELS['parakeet-ctc-0.6b'];
-
     it('11 s file -> one segment ending at 11, not the 30 s window', async () => {
         const [chunk] = await throughPort(new Float32Array(16_000 * 11));
         expect(chunk.samples).toHaveLength(480_000);
         expect(chunk.duration).toBe(11);
-        const segs = buildSegments({ text: ' and so my fellow americans ' }, chunk, ctc);
+        const segs = buildSegments({ text: ' and so my fellow americans ' }, chunk);
         expect(segs).toEqual([{ text: 'and so my fellow americans', start: 0, end: 11 }]);
     });
 
     it('41 s file -> segments 0-30 and 30-41', async () => {
         const chunks = await throughPort(new Float32Array(16_000 * 41));
-        const segs = chunks.flatMap((c) => buildSegments({ text: 'x' }, c, ctc));
+        const segs = chunks.flatMap((c) => buildSegments({ text: 'x' }, c));
         expect(segs.map((s) => [s.start, s.end])).toEqual([[0, 30], [30, 41]]);
     });
 
     it('clamps a pipeline chunk reporting the full 30 s window', async () => {
         const [chunk] = await throughPort(new Float32Array(16_000 * 11));
-        const segs = buildSegments({ text: 'x', chunks: [{ text: 'x', timestamp: [0, 30] }] }, chunk, ctc);
+        const segs = buildSegments({ text: 'x', segments: [{ text: 'x', start: 0, end: 30 }] }, chunk);
         expect(segs[0].end).toBe(11);
     });
 
     it('whisper word path clamps the last word to the audio end', async () => {
         const [chunk] = await throughPort(new Float32Array(16_000 * 11));
         const segs = buildSegments(
-            { text: 'country', chunks: [{ text: ' country.', timestamp: [10.56, 15.9] }] },
+            { text: 'country', words: [{ text: ' country.', start: 10.56, end: 15.9 }] },
             chunk,
-            MODELS['whisper-tiny_timestamped'],
         );
         expect(segs[0]).toMatchObject({ start: 10.56, end: 11 });
         expect(segs[0].words![0].end).toBe(11);
