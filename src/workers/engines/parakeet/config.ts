@@ -1,6 +1,21 @@
 /** Pure helpers for the parakeet engine (no runtime imports, unit-tested). */
 import type { QuantizationType } from '../../../types.js';
-import type { TimestampChunk } from '../../../lib/word-segments.js';
+import type { EngineDescriptor, TimedText } from '../types.js';
+
+export interface ParakeetConfig {
+    /** Hugging Face repo with parakeet.js-layout ONNX files */
+    repo: string;
+    /** Encoder dtype used for quantization 'hybrid' */
+    hybridEncoder: 'fp16' | 'q8' | 'fp32';
+}
+
+// WebGPU only: the owner does not ship models that can't run on WebGPU.
+export const parakeetEngine: EngineDescriptor<ParakeetConfig> = {
+    devices: ['webgpu'],
+    quantizations: ['hybrid', 'fp16', 'q8', 'fp32'],
+    cacheId: (c) => c.repo,
+    legacyHybridDtype: (c) => c.hybridEncoder,
+};
 
 /** parakeet.js version loaded at runtime. Pinned: bump deliberately. */
 export const PARAKEET_JS_VERSION = '1.4.4';
@@ -35,7 +50,7 @@ export function hubUrl(repo: string, file: string): string {
     return `https://huggingface.co/${repo}/resolve/main/${file}`;
 }
 
-/** parakeet.js word timings → pipeline-style chunks (chunk-relative seconds). */
-export function wordsToChunks(words: { text: string; start_time: number; end_time: number }[] | undefined): TimestampChunk[] {
-    return (words ?? []).map((w) => ({ text: w.text, timestamp: [w.start_time, w.end_time] }));
+/** parakeet.js word timings → neutral words (chunk-relative seconds). */
+export function toWords(words: { text: string; start_time: number; end_time: number }[] | undefined): TimedText[] {
+    return (words ?? []).map((w) => ({ text: w.text, start: w.start_time, end: w.end_time }));
 }

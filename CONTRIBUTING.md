@@ -38,14 +38,19 @@ The Vite configs and `vercel.json` already set these. If you add a new page or e
 
 ## Adding an ASR engine
 
-Engines live under `src/workers/engines/`. The worker resolves a model's `engine` field, dynamically imports that runtime, and runs WebGPU→WASM fallback; decoding, chunking, OPFS, progress, fatal errors, and segment clamping stay shared above the engine.
+Engines live under `src/workers/engines/<id>/`. The shared worker (`src/workers/asr-core.ts`) validates the request, picks devices WebGPU-first, lazy-loads the runtime, and turns the engine's neutral result into clamped, file-relative segments. Decoding, chunking, the OPFS cache, progress, cancel/run ids, and fatal errors stay shared above the engine. The contracts are in `src/workers/engines/types.ts`.
 
-1. Add an id to `EngineId` in `src/types.ts` and set `engine: '<id>'` on the models that use it.
-2. Implement `ASREngine` (`load` / `transcribe` / `dispose`) in e.g. `src/workers/engines/my-engine/index.ts`. Keep the dependency out of the static import graph — only the registry's `create` thunk may `import()`.
-3. Register it in `ENGINES` in `src/workers/engines/registry.ts` with its preferred `devices` (WebGPU first).
-4. Do **not** add unused runtimes to `package.json` until a model needs them. `vite.config.ts` / `vite.demo.config.ts` already inline worker dynamic imports so the blob: worker stays self-contained.
-5. For each new model, add an entry to `site/model-meta.ts` (label, size, group, notes, credit). The demo/example pickers, the docs and home model tables, and the credits blocks are generated from it at site-build time (`<!-- @models:... -->` markers), so don't hand-edit those lists. Add the model to the README Models table too; `src/tests/model-lists.test.ts` fails if they drift.
-6. Cover registry / model→engine resolution in `src/tests/engines.test.ts`, then run the checks above.
+A new engine touches these files:
+
+1. `src/workers/engines/<id>/config.ts`: your config type plus a pure `EngineDescriptor` (`devices`, `quantizations`, `cacheId`, `legacyHybridDtype`). No runtime imports here; the main thread imports it.
+2. `src/workers/engines/<id>/index.ts`: `export function createEngine(): ASREngine<YourConfig>`. `load` gets `{ device, quantization, adapterFeatures, onFile, signal }`; `transcribe` returns `{ text, words? | segments? }` in chunk-relative seconds. Only this file may import the runtime package.
+3. `src/workers/engines/catalog.ts`: add the descriptor to `ENGINES` (this is what defines `EngineId`).
+4. `src/workers/engines/runtimes.ts`: add `<id>: () => import('./<id>/index.js').then((m) => m.createEngine())`. Typecheck fails until this exists.
+5. `src/models.ts`: add model entries `{ engine: '<id>', capabilities, engineConfig }`. `engineConfig` is type-checked against your config type, and the model id becomes part of `ASRModel` automatically.
+6. Model docs: `site/model-meta.ts` (label, size, group, notes, credit; the demo/example pickers, docs/home tables, and credits are generated from it), the README Models table (`src/tests/model-lists.test.ts` catches drift), and `THIRD_PARTY_NOTICES.md` for the runtime and weights licenses.
+7. Tests: `src/tests/<id>-engine.test.ts` for your pure helpers. The worker contract (`asr-worker-contract.test.ts`), the import-isolation check (`engine-isolation.test.ts`), and the bundle budget (`bun run size`) already cover the integration.
+
+Do **not** add a runtime to `package.json` until a model needs it, and prefer a lazy CDN import or a separate chunk for large runtimes. `vite.config.ts` and `vite.demo.config.ts` inline worker dynamic imports so the blob: worker stays self-contained, which means anything you statically bundle counts against the size budget.
 
 ## Pull requests
 

@@ -1,7 +1,7 @@
 /**
  * bridge.ts
  *
- * Orchestrates the Decoder and Whisper workers via:
+ * Orchestrates the Decoder and ASR workers via:
  *  - A MessageChannel for direct worker-to-worker PCMChunk flow
  *  - Routing messages from the Whisper worker back to the caller via callbacks
  *
@@ -34,7 +34,7 @@ import { downmixToMono, resampleTo16kHz } from './resampler.js';
 // bare module specifiers (e.g. @huggingface/transformers) are resolved at
 // build time rather than at runtime — blob: URLs cannot resolve bare specifiers.
 import DecoderWorker from '../workers/decoder-worker.ts?worker&inline';
-import WhisperWorker from '../workers/whisper-worker.ts?worker&inline';
+import AsrWorker from '../workers/asr-worker.ts?worker&inline';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -51,6 +51,12 @@ export interface BridgeOptions {
     whisperWorker?: Worker;
 }
 
+let lastRunId = 0;
+/** Unique id for one request to an ASR worker; its replies carry it back (see asr-core.ts). */
+export function nextRunId(): number {
+    return ++lastRunId;
+}
+
 // ---------------------------------------------------------------------------
 // Bridge
 // ---------------------------------------------------------------------------
@@ -61,17 +67,18 @@ export class Bridge {
     private readonly callbacks: BridgeCallbacks;
     private readonly ownsWhisperWorker: boolean;
     private terminated = false;
+    private readonly runId = nextRunId();
 
     constructor(callbacks: BridgeCallbacks, options: BridgeOptions = {}) {
         this.callbacks = callbacks;
 
         this.decoderWorker = new DecoderWorker();
-        this.whisperWorker = options.whisperWorker ?? new WhisperWorker();
+        this.whisperWorker = options.whisperWorker ?? new AsrWorker();
         this.ownsWhisperWorker = !options.whisperWorker;
 
         // Route messages from the Whisper worker
         this.whisperWorker.onmessage = (e: MessageEvent<MainThreadMessage>) => {
-            this.handleWhisperMessage(e.data);
+            if (this.isOwnRun(e.data)) this.handleWhisperMessage(e.data);
         };
 
         // Route messages from the Decoder worker (progress + errors)
@@ -80,8 +87,8 @@ export class Bridge {
         };
 
         this.whisperWorker.onerror = (e) => {
-            console.error('[browser-whisper] Whisper worker thread crashed:', e);
-            callbacks.onError(`Whisper worker: ${e.message ?? 'unknown error'}`);
+            console.error('[browser-whisper] ASR worker thread crashed:', e);
+            callbacks.onError(`ASR worker: ${e.message ?? 'unknown error'}`);
         };
 
         this.decoderWorker.onerror = (e) => {
@@ -114,10 +121,10 @@ export class Bridge {
         }
 
         // Give port2 to whisper (it will receive PCMChunks through it)
-        this.whisperWorker.postMessage({ type: 'port', port: port2 }, [port2]);
+        this.whisperWorker.postMessage({ type: 'port', runId: this.runId, port: port2 }, [port2]);
 
         // Start model loading (runs concurrently with decode)
-        this.whisperWorker.postMessage({ type: 'init', model, language, quantization });
+        this.whisperWorker.postMessage({ type: 'init', runId: this.runId, model, language, quantization });
 
         // Wait for the model to finish loading before feeding chunks into it
         await this.waitForReady();
@@ -145,8 +152,8 @@ export class Bridge {
     ): Promise<void> {
         const { port1, port2 } = new MessageChannel();
 
-        this.whisperWorker.postMessage({ type: 'port', port: port2 }, [port2]);
-        this.whisperWorker.postMessage({ type: 'init', model, language, quantization });
+        this.whisperWorker.postMessage({ type: 'port', runId: this.runId, port: port2 }, [port2]);
+        this.whisperWorker.postMessage({ type: 'init', runId: this.runId, model, language, quantization });
 
         await this.waitForReady();
 
@@ -163,11 +170,21 @@ export class Bridge {
 
     /** Terminate both workers and clean up resources */
     terminate(): void {
+        if (this.terminated) return;
         this.terminated = true;
         this.decoderWorker.terminate();
         if (this.ownsWhisperWorker) {
             this.whisperWorker.terminate();
+        } else {
+            // Shared (reusable) worker: stop this run so its queued chunks and in-flight
+            // results never reach the next transcribe() on the same instance (#34).
+            this.whisperWorker.postMessage({ type: 'cancel', runId: this.runId });
         }
+    }
+
+    /** Messages tagged with another run (e.g. a cancelled one) are ignored. */
+    private isOwnRun(msg: MainThreadMessage): boolean {
+        return msg.runId === undefined || msg.runId === this.runId;
     }
 
     // ---------------------------------------------------------------------------
@@ -290,6 +307,7 @@ export class Bridge {
             const original = this.whisperWorker.onmessage;
 
             this.whisperWorker.onmessage = (e: MessageEvent<MainThreadMessage>) => {
+                if (!this.isOwnRun(e.data)) return;
                 if (e.data.type === 'ready') {
                     this.whisperWorker.onmessage = original;
                     resolve();

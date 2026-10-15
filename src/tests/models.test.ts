@@ -43,14 +43,23 @@ describe('MODELS', () => {
     test('parakeet-ctc-0.6b is English-only CTC with no timestamps and an explicit q8 dtype', () => {
         // The transformers.js 4.x CTC pipeline (_call_wav2vec2) returns { text } only and
         // ignores language / return_timestamps / chunk_length_s.
-        expect(MODELS['parakeet-ctc-0.6b']).toEqual({
+        expect(MODELS['parakeet-ctc-0.6b']).toMatchObject({
             engine: 'transformers',
             hfId: 'onnx-community/parakeet-ctc-0.6b-ONNX',
             hybridDtype: 'q8',
             supportsTimestamps: false,
             supportsWordTimestamps: false,
             supportsLanguage: false,
+            capabilities: { timestamps: false, wordTimestamps: false, language: false },
+            engineConfig: { hfId: 'onnx-community/parakeet-ctc-0.6b-ONNX', hybridDtype: 'q8' },
         });
+    });
+
+    test('deprecated flat fields mirror capabilities (backward compatible)', () => {
+        for (const c of Object.values(MODELS)) {
+            expect([c.supportsTimestamps, c.supportsWordTimestamps, c.supportsLanguage])
+                .toEqual([c.capabilities.timestamps, c.capabilities.wordTimestamps, c.capabilities.language]);
+        }
     });
 
     test('whisper-large-v3 is not offered (its 2.55 GB fp32 encoder cannot be allocated in browsers)', () => {

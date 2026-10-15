@@ -24,6 +24,7 @@
     "build": "bun --bun vite build && tsc --emitDeclarationOnly",
     "build:site": "bun --bun vite build -c vite.demo.config.ts && bun run embed:home-html",
     "embed:home-html": "bun scripts/embed-home-html.ts",
+    "size": "bun scripts/check-bundle-size.ts",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.site.json",
     "preview": "bun --bun vite preview",
     "test": "bun test",

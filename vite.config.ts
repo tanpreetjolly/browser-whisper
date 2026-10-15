@@ -31,7 +31,7 @@ export default defineConfig({
     format: 'es',
     rollupOptions: {
       external: [],
-      // Engines are reached via dynamic import (src/workers/engines/registry.ts) so
+      // Engines are reached via dynamic import (src/workers/engines/runtimes.ts) so
       // a runtime is only evaluated when a model needs it. A blob: worker cannot
       // fetch sibling chunks, so keep those imports inside the worker blob.
       output: { inlineDynamicImports: true },
