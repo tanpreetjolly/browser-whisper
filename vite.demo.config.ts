@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
+import { resolve } from 'path'
+import { modelListsPlugin } from './site/model-html';
 
 export default defineConfig({
+    plugins: [modelListsPlugin()],
     // Output the compiled site to a distinct folder
     build: {
         outDir: 'dist-site',
