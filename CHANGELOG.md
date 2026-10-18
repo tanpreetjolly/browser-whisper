@@ -44,6 +44,9 @@ Dates are npm publish dates in **IST (UTC+5:30)**, taken from the npm registry. 
 - More tests for model families and configuration invariants (#24, #30).
 - New trademark policy for the browser-whisper name (#26).
 
+### Changed
+- README and the docs API reference now document `TranscribeStream.cancel()`, `TranscribePCMStream.cancel()`, and `BrowserWhisper.dispose()` (#19).
+
 ## [1.2.0] - 2026-10-11
 
 ### Added

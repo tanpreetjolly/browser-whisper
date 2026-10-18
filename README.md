@@ -124,6 +124,22 @@ await BrowserWhisper.clearCache()
 await BrowserWhisper.deleteModel('whisper-tiny')
 ```
 
+### Cancel and dispose
+
+```ts
+const stream = whisper.transcribe(file)
+
+cancelButton.addEventListener('click', () => stream.cancel())
+
+for await (const { text } of stream) {
+  console.log(text)
+}
+
+whisper.dispose()
+```
+
+`stream.cancel()` is on both `TranscribeStream` and `TranscribePCMStream`. It stops the in-progress transcription and ends the iterator. After cancelling, call `dispose()` (or create a new instance) before starting another transcription. `whisper.dispose()` terminates the ASR worker; call it when the instance will not be used again, such as when a component unmounts.
+
 ---
 
 ## Models
