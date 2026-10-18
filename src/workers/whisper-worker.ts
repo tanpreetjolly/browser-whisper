@@ -86,7 +86,6 @@ self.onmessage = async (e: MessageEvent) => {
                 // Guard the whole load: an error that escapes an engine's internal promises
                 // would otherwise leave this await pending forever (UI stuck at 99%).
                 const loaded = await fatalErrors.guard((async () => {
-                    const next = await entry.create();
                     // Check for a usable GPU adapter *before* asking the engine for WebGPU.
                     // transformers.js 4.x chains every InferenceSession.create() on one module-level
                     // promise; a rejected WebGPU session poisons it so the WASM fallback in this
@@ -96,7 +95,11 @@ self.onmessage = async (e: MessageEvent) => {
                         console.warn('[browser-whisper] No WebGPU adapter available. Using WASM execution.');
                     }
                     const plan = planDevices(entry.devices, gpu);
-                    if (plan.length === 0) throw new Error(`No supported device for engine "${config.engine}"`);
+                    if (plan.length === 0) {
+                        throw new Error(`Model "${model}" requires WebGPU, but no WebGPU adapter is available in this browser.`);
+                    }
+                    // Only now fetch/evaluate the runtime, so an unsupported browser never downloads it.
+                    const next = await entry.create();
                     for (let i = 0; i < plan.length; i++) {
                         try {
                             await next.load(config, plan[i], { quantization, onProgress });

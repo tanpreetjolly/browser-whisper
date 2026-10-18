@@ -33,6 +33,15 @@ describe('engine registry', () => {
         expect(typeof ENGINES.transformers.create).toBe('function');
     });
 
+    test('parakeet-tdt-0.6b-v3 resolves to the WebGPU-only parakeet engine', () => {
+        const r = resolveEngine('parakeet-tdt-0.6b-v3');
+        expect(r.engineId).toBe('parakeet');
+        expect(ENGINES.parakeet.devices).toEqual(['webgpu']);
+        // No adapter → no device → the worker refuses before downloading the runtime.
+        expect(planDevices(ENGINES.parakeet.devices, false)).toEqual([]);
+        expect(planDevices(ENGINES.parakeet.devices, true)).toEqual(['webgpu']);
+    });
+
     test('transformers engine supports WebGPU then WASM', () => {
         expect(ENGINES.transformers.devices).toEqual(['webgpu', 'wasm']);
     });

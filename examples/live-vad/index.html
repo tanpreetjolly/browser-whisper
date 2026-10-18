@@ -52,6 +52,9 @@
           <optgroup label="Parakeet (English only)">
             <option value="parakeet-ctc-0.6b">Parakeet CTC 0.6B (~612 MB)</option>
           </optgroup>
+          <optgroup label="Parakeet TDT · WebGPU only, needs shader-f16 (else quantization q8 via API) · 25 languages">
+            <option value="parakeet-tdt-0.6b-v3">Parakeet TDT 0.6B v3 (~1.26 GB)</option>
+          </optgroup>
           <optgroup label="Whisper">
             <option value="whisper-tiny">Whisper Tiny (~120 MB)</option>
             <option value="whisper-base" selected>Whisper Base (~206 MB)</option>
@@ -78,6 +81,9 @@
         <button type="button" id="stop" class="secondary" disabled>Stop</button>
         <button type="button" id="clear" class="secondary">Clear</button>
       </div>
+<p class="model-credits" style="font-size:12px;opacity:.75;margin-top:12px;line-height:1.5">
+  Model credits: <a href="https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3" target="_blank" rel="noopener">Parakeet TDT 0.6B v3</a> and <a href="https://huggingface.co/nvidia/parakeet-ctc-0.6b" target="_blank" rel="noopener">Parakeet CTC 0.6B</a> by NVIDIA, licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener">CC BY 4.0</a>. Changes: converted to ONNX and quantized by <a href="https://huggingface.co/istupakov/parakeet-tdt-0.6b-v3-onnx" target="_blank" rel="noopener">istupakov</a>/<a href="https://huggingface.co/ysdede/parakeet-tdt-0.6b-v3-onnx" target="_blank" rel="noopener">ysdede</a> (TDT) and <a href="https://huggingface.co/onnx-community" target="_blank" rel="noopener">onnx-community</a> (CTC). Whisper by OpenAI (MIT), Moonshine by Useful Sensors (MIT), Distil-Whisper by Hugging Face (MIT), Lite-Whisper by efficient-speech (Apache-2.0); ONNX exports by onnx-community. TDT runs with <a href="https://github.com/ysdede/parakeet.js" target="_blank" rel="noopener">parakeet.js</a> (MIT). <a href="https://github.com/tanpreetjolly/browser-whisper/blob/main/THIRD_PARTY_NOTICES.md" target="_blank" rel="noopener">All third-party notices</a>.
+</p>
     </section>
 
     <div class="grid-2">
