@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "noEmit": true, "declaration": false, "declarationMap": false, "emitDeclarationOnly": false },
+  "include": ["site/model-meta.ts", "site/model-html.ts", "src/types.ts"],
+  "exclude": []
+}

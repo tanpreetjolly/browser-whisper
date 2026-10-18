@@ -1,7 +1,9 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
+import { modelListsPlugin } from './site/model-html'
 
 export default defineConfig({
+    plugins: [modelListsPlugin()],
   build: {
     // public/ holds demo-site assets (favicon, og-image, robots, sitemap);
     // keep them out of the library's dist/.

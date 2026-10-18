@@ -44,7 +44,8 @@ Engines live under `src/workers/engines/`. The worker resolves a model's `engine
 2. Implement `ASREngine` (`load` / `transcribe` / `dispose`) in e.g. `src/workers/engines/my-engine/index.ts`. Keep the dependency out of the static import graph — only the registry's `create` thunk may `import()`.
 3. Register it in `ENGINES` in `src/workers/engines/registry.ts` with its preferred `devices` (WebGPU first).
 4. Do **not** add unused runtimes to `package.json` until a model needs them. `vite.config.ts` / `vite.demo.config.ts` already inline worker dynamic imports so the blob: worker stays self-contained.
-5. Cover registry / model→engine resolution in `src/tests/engines.test.ts`, then run the checks above.
+5. For each new model, add an entry to `site/model-meta.ts` (label, size, group, notes, credit). The demo/example pickers, the docs and home model tables, and the credits blocks are generated from it at site-build time (`<!-- @models:... -->` markers), so don't hand-edit those lists. Add the model to the README Models table too; `src/tests/model-lists.test.ts` fails if they drift.
+6. Cover registry / model→engine resolution in `src/tests/engines.test.ts`, then run the checks above.
 
 ## Pull requests
 
