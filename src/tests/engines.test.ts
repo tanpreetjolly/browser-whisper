@@ -1,49 +1,32 @@
 import { describe, expect, test } from 'bun:test';
-import { MODELS, type ASRModel, type ModelConfig } from '../types';
-import { ENGINES, planDevices, resolveEngine, type EngineEntry } from '../workers/engines/registry';
+import { MODELS } from '../types';
+import { MODEL_DEFINITIONS } from '../models';
+import { ENGINES, planDevices } from '../workers/engines/catalog';
+import { RUNTIMES } from '../workers/engines/runtimes';
 
-describe('engine registry', () => {
-    test('every model names a registered engine', () => {
-        for (const [name, cfg] of Object.entries(MODELS)) {
-            expect({ name, ok: cfg.engine in ENGINES }).toEqual({ name, ok: true });
+describe('engine catalog', () => {
+    test('every model names a cataloged engine with a runtime', () => {
+        for (const [name, def] of Object.entries(MODEL_DEFINITIONS)) {
+            expect({ name, ok: def.engine in ENGINES && def.engine in RUNTIMES }).toEqual({ name, ok: true });
         }
+        expect(Object.keys(RUNTIMES).sort()).toEqual(Object.keys(ENGINES).sort());
     });
 
-    test('resolveEngine maps a model to its engine entry', () => {
-        const r = resolveEngine('parakeet-ctc-0.6b');
-        expect(r.engineId).toBe('transformers');
-        expect(r.engine).toBe(ENGINES.transformers);
-        expect(r.config).toBe(MODELS['parakeet-ctc-0.6b']);
+    test('public MODELS derives hfId from the engine (unchanged cache ids)', () => {
+        expect(MODELS['parakeet-ctc-0.6b'].hfId).toBe('onnx-community/parakeet-ctc-0.6b-ONNX');
+        expect(MODELS['parakeet-tdt-0.6b-v3'].hfId).toBe('ysdede/parakeet-tdt-0.6b-v3-onnx');
+        expect(MODELS['parakeet-tdt-0.6b-v3'].hybridDtype).toBe('fp16');
+        expect(MODELS['whisper-tiny'].engine).toBe('transformers');
     });
 
-    test('resolveEngine rejects unknown models and unknown engines', () => {
-        expect(() => resolveEngine('nope' as ASRModel)).toThrow('Unknown model');
-        const models = { x: { ...MODELS['whisper-tiny'], engine: 'ghost' } as unknown as ModelConfig };
-        expect(() => resolveEngine('x' as ASRModel, models)).toThrow('unknown engine "ghost"');
+    test('runtimes are thunks (catalog/runtimes import does not load a runtime)', () => {
+        for (const f of Object.values(RUNTIMES)) expect(typeof f).toBe('function');
     });
 
-    test('resolveEngine uses the injected registry', () => {
-        const fake: EngineEntry = { devices: ['wasm'], create: async () => { throw new Error('unused'); } };
-        const models = { m: { ...MODELS['whisper-tiny'], engine: 'fake' } as unknown as ModelConfig };
-        expect(resolveEngine('m' as ASRModel, models, { fake }).engine).toBe(fake);
-    });
-
-    test('engines are not loaded until create() is called', () => {
-        // create is a thunk around a dynamic import; registry import must not pull the runtime in.
-        expect(typeof ENGINES.transformers.create).toBe('function');
-    });
-
-    test('parakeet-tdt-0.6b-v3 resolves to the WebGPU-only parakeet engine', () => {
-        const r = resolveEngine('parakeet-tdt-0.6b-v3');
-        expect(r.engineId).toBe('parakeet');
-        expect(ENGINES.parakeet.devices).toEqual(['webgpu']);
-        // No adapter → no device → the worker refuses before downloading the runtime.
-        expect(planDevices(ENGINES.parakeet.devices, false)).toEqual([]);
-        expect(planDevices(ENGINES.parakeet.devices, true)).toEqual(['webgpu']);
-    });
-
-    test('transformers engine supports WebGPU then WASM', () => {
+    test('device + quantization declarations', () => {
         expect(ENGINES.transformers.devices).toEqual(['webgpu', 'wasm']);
+        expect(ENGINES.parakeet.devices).toEqual(['webgpu']);
+        expect(ENGINES.transformers.quantizations).toContain('q4');
     });
 });
 

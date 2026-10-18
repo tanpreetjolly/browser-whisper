@@ -1,8 +1,8 @@
-/** Transformers.js engine: Whisper, Moonshine, Distil-Whisper, Parakeet CTC. */
 import { pipeline, env } from '@huggingface/transformers';
 import { createOPFSCache } from '../../../lib/opfs-cache.js';
-import type { ModelConfig } from '../../../types.js';
-import type { ASREngine, EngineOutput } from '../types.js';
+import type { ASREngine, ModelCapabilities } from '../types.js';
+import type { TransformersConfig } from './config.js';
+import { toEngineResult } from './output.js';
 
 let envReady = false;
 function setupEnv(): void {
@@ -21,42 +21,50 @@ function setupEnv(): void {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ASRPipeline = ((input: Float32Array, opts: Record<string, unknown>) => Promise<any>) & { dispose?(): Promise<void> };
 
-export function createTransformersEngine(): ASREngine {
+export function createEngine(): ASREngine<TransformersConfig> {
     let asr: ASRPipeline | null = null;
-    let config: ModelConfig | null = null;
+    let caps: ModelCapabilities | null = null;
 
     return {
-        async load(model, device, { quantization, onProgress }) {
+        async load({ engineConfig, capabilities }, { device, quantization, onFile }) {
+            // pipeline() takes no AbortSignal; downloadModel aborts by terminating the worker.
             setupEnv();
-            const dtype = quantization === 'hybrid' ? model.hybridDtype : quantization;
+            const dtype = quantization === 'hybrid' ? engineConfig.hybridDtype : quantization;
             asr = (await (pipeline as (...a: unknown[]) => Promise<unknown>)(
                 'automatic-speech-recognition',
-                model.hfId,
-                { device, dtype, progress_callback: onProgress },
+                engineConfig.hfId,
+                {
+                    device,
+                    dtype,
+                    progress_callback: (p: { status?: string; file?: string; loaded?: number; total?: number }) => {
+                        if (!p.file) return;
+                        if (p.status === 'initiate') onFile(p.file, 0, 0);
+                        else if (p.status === 'progress') onFile(p.file, p.loaded ?? 0, p.total ?? 0);
+                    },
+                },
             )) as ASRPipeline;
-            config = model;
+            caps = capabilities;
         },
 
-        async transcribe(samples, { language }): Promise<EngineOutput> {
-            if (!asr || !config) throw new Error('Transformers engine not loaded');
-            const returnTimestamps = config.supportsWordTimestamps
-                ? 'word'
-                : config.supportsTimestamps ? true : undefined;
-            return await asr(samples, {
+        async transcribe(samples, { language }) {
+            if (!asr || !caps) throw new Error('Transformers engine not loaded');
+            const returnTimestamps = caps.wordTimestamps ? 'word' : caps.timestamps ? true : undefined;
+            const out = await asr(samples, {
                 sampling_rate: 16_000,
                 ...(returnTimestamps !== undefined && {
                     return_timestamps: returnTimestamps,
                     chunk_length_s: 30,
                     stride_length_s: 5,
                 }),
-                ...(config.supportsLanguage && language ? { language } : {}),
+                ...(language ? { language } : {}),
             });
+            return toEngineResult(out, caps.wordTimestamps);
         },
 
         async dispose() {
             const p = asr;
             asr = null;
-            config = null;
+            caps = null;
             try { await p?.dispose?.(); } catch { /* ignore */ }
         },
     };
