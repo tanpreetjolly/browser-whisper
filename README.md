@@ -138,7 +138,7 @@ for await (const { text } of stream) {
 whisper.dispose()
 ```
 
-`stream.cancel()` is on both `TranscribeStream` and `TranscribePCMStream`. It stops the in-progress transcription and ends the iterator. After cancelling, call `dispose()` (or create a new instance) before starting another transcription. `whisper.dispose()` terminates the ASR worker; call it when the instance will not be used again, such as when a component unmounts.
+`stream.cancel()` is on both `TranscribeStream` and `TranscribePCMStream`. It stops the in-progress transcription and ends the iterator. After `cancel()`, you can start another transcription on the same instance. It begins once the chunk currently being transcribed finishes (that result is discarded), and the loaded model is reused. `whisper.dispose()` terminates the ASR worker; call it when the instance will not be used again, such as when a component unmounts.
 
 ---
 
@@ -175,7 +175,7 @@ Timestamped, lite, and large-v3-turbo variants are supported too. Full list: [do
 ```
 Your file
   → Decoder worker (mediabunny + WebCodecs → 16 kHz mono chunks)
-    → Whisper worker (Transformers.js + ONNX on WebGPU)
+    → ASR worker (engine: Transformers.js or parakeet.js, WebGPU first)
       → Main thread (async iterator / callbacks)
 ```
 

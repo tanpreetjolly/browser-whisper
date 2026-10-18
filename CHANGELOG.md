@@ -9,6 +9,9 @@ Dates are npm publish dates in **IST (UTC+5:30)**, taken from the npm registry. 
 
 ## [Unreleased]
 
+### Changed
+- README and the docs API reference now document `TranscribeStream.cancel()`, `TranscribePCMStream.cancel()`, and `BrowserWhisper.dispose()` (#19, #31), including that an instance can be reused after `cancel()` (#34).
+
 ## [2.0.0] - 2026-10-18
 
 ### Breaking changes
@@ -43,9 +46,6 @@ Dates are npm publish dates in **IST (UTC+5:30)**, taken from the npm registry. 
 - The worker file is renamed from `whisper-worker.ts` to `asr-worker.ts`, with its logic in a testable `asr-core.ts`. Worker error messages say "ASR worker".
 - More tests for model families and configuration invariants (#24, #30).
 - New trademark policy for the browser-whisper name (#26).
-
-### Changed
-- README and the docs API reference now document `TranscribeStream.cancel()`, `TranscribePCMStream.cancel()`, and `BrowserWhisper.dispose()` (#19).
 
 ## [1.2.0] - 2026-10-11
 
