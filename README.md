@@ -138,7 +138,7 @@ for await (const { text } of stream) {
 whisper.dispose()
 ```
 
-`stream.cancel()` is on both `TranscribeStream` and `TranscribePCMStream`. It stops the in-progress transcription and ends the iterator. The loaded Whisper worker stays available for the next call. `whisper.dispose()` terminates that worker; call it when the instance will not be used again, such as when a component unmounts.
+`stream.cancel()` is on both `TranscribeStream` and `TranscribePCMStream`. It stops the in-progress transcription and ends the iterator. After cancelling, call `dispose()` (or create a new instance) before starting another transcription. `whisper.dispose()` terminates the ASR worker; call it when the instance will not be used again, such as when a component unmounts.
 
 ---
 

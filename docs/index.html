@@ -511,9 +511,10 @@ console.log(segments.map(s => s.text).join(' '))</code></pre>
         <h3><code>stream.cancel()</code> and <code>whisper.dispose()</code></h3>
         <p>
           <code>TranscribeStream.cancel()</code> and <code>TranscribePCMStream.cancel()</code>
-          stop an in-progress transcription and end the async iterator. The loaded
-          Whisper worker stays available for the next call.
-          <code>BrowserWhisper.dispose()</code> terminates that worker. Call it when
+          stop an in-progress transcription and end the async iterator. After
+          cancelling, call <code>dispose()</code> (or create a new instance) before
+          starting another transcription.
+          <code>BrowserWhisper.dispose()</code> terminates the ASR worker. Call it when
           the instance will not be used again, for example when a component unmounts.
         </p>
         <pre><code>const stream = whisper.transcribe(file)
