@@ -13,7 +13,14 @@ Dates are npm publish dates in **IST (UTC+5:30)**, taken from the npm registry. 
 - `THIRD_PARTY_NOTICES.md` (shipped in the npm package): licenses, copyright lines, and full texts for bundled code, CDN-loaded runtimes, and every model's weights. `THIRD_PARTY_LICENSES` now points to it. Visible model credits (with the CC BY 4.0 attribution and a note of changes) on the demo, examples, docs and home pages, plus a README Credits section.
 - `parakeet-tdt-0.6b-v3` (NVIDIA Parakeet TDT 0.6B v3, CC-BY-4.0): **WebGPU only**. Multilingual (auto-detected), with punctuation and word timestamps. Runs on a new `parakeet` engine that loads [parakeet.js](https://github.com/ysdede/parakeet.js) from a pinned CDN URL on demand, so it is never bundled.
 
+### Fixed
+- `cancel()` followed by another `transcribe()` on the same `BrowserWhisper` instance no longer receives leftover segments (and an early `done`) from the cancelled run. Each run now has an id, and cancelling drops the worker's queued chunks and discards in-flight results ([#34](https://github.com/tanpreetjolly/browser-whisper/issues/34)).
+
 ### Changed
+- `ModelConfig` gains `capabilities` (`timestamps`, `wordTimestamps`, `language`) and an engine-owned `engineConfig`. `hfId`, `hybridDtype` and the `supports*` flags are still present but deprecated. `ModelCapabilities` and `EngineId` are now exported types.
+- An unsupported `quantization` for a model's engine (e.g. `q4` on `parakeet-tdt-0.6b-v3`) is rejected up front with a clear `ModelLoadError`, before anything downloads.
+- A console warning is logged when `language` is passed to a model that ignores it.
+- Internal: engine-neutral engine interface (neutral words/segments output, per-file progress, AbortSignal, WebGPU adapter features passed in); `whisper-worker.ts` renamed to `asr-worker.ts`, with its logic in a testable `asr-core.ts`; CI workflow, bundle-size budget (`bun run size`), worker contract and import-isolation tests.
 - Internal: ASR runtimes are now pluggable engines (`src/workers/engines/`). The Transformers.js logic moved into a lazily `import()`ed `transformers` engine; each `MODELS` entry names its `engine` (new `ModelConfig.engine` field). No runtime behaviour or public API change.
 
 ### Removed

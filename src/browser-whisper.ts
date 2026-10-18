@@ -16,7 +16,7 @@
  *   transcriber.transcribe(file, { onSegment: (s) => appendToUI(s) })
  */
 
-import { Bridge } from './lib/bridge.js';
+import { Bridge, nextRunId } from './lib/bridge.js';
 import { BrowserWhisperError } from './errors.js';
 import type {
     MainThreadMessage,
@@ -33,7 +33,7 @@ import {
     deleteModelFromOPFSCache,
 } from './lib/opfs-cache.js';
 
-import WhisperWorker from './workers/whisper-worker.ts?worker&inline';
+import AsrWorker from './workers/asr-worker.ts?worker&inline';
 
 const LEGACY_CACHE_NAME = 'transformers-cache';
 
@@ -135,7 +135,7 @@ export class BrowserWhisper {
 
     private getWhisperWorker(): Worker {
         if (!this.whisperWorker) {
-            this.whisperWorker = new WhisperWorker();
+            this.whisperWorker = new AsrWorker();
         }
 
         return this.whisperWorker;
@@ -152,6 +152,8 @@ export class BrowserWhisper {
         }
 
         const worker = this.getWhisperWorker();
+
+        const runId = nextRunId();
 
         return new Promise((resolve, reject) => {
             let settled = false;
@@ -177,6 +179,7 @@ export class BrowserWhisper {
                 if (settled) return;
 
                 const message = event.data;
+                if (message.runId !== undefined && message.runId !== runId) return;
 
                 if (message.type === 'ready') {
                     cleanup();
@@ -198,10 +201,10 @@ export class BrowserWhisper {
             worker.onerror = (event) => {
                 if (settled) return;
                 cleanup();
-                reject(new BrowserWhisperError(event.message ?? 'Whisper worker failed.'));
+                reject(new BrowserWhisperError(event.message ?? 'ASR worker failed.'));
             };
 
-            worker.postMessage({ type: 'init', model, quantization });
+            worker.postMessage({ type: 'init', runId, model, quantization });
         });
     }
 }

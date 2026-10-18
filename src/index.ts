@@ -8,6 +8,8 @@ export type {
     ASRModel,
     WhisperModel, // @deprecated — use ASRModel
     ModelConfig,
+    ModelCapabilities,
+    EngineId,
     TranscriptSegment,
     TranscribeOptions,
     TranscribeProgress,

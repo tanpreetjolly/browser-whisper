@@ -1,30 +1,9 @@
-import type { ModelConfig, PCMChunk, TranscriptSegment, WordTimestamp } from '../types.js';
+import type { PCMChunk, TranscriptSegment, WordTimestamp } from '../types.js';
+import type { EngineResult, TimedText } from '../workers/engines/types.js';
 
 const SENTENCE_END = /[.!?…]["')\]]*$/;
 const MAX_WORDS_PER_SEGMENT = 14;
 const MAX_GAP_S = 1.2;
-
-/** Pipeline chunk shape when `return_timestamps` is enabled */
-export interface TimestampChunk {
-    text: string;
-    timestamp: [number | null, number | null];
-}
-
-/** Map ASR pipeline chunks to file-relative words */
-export function chunksToWords(
-    chunks: TimestampChunk[],
-    chunkOffsetSeconds: number,
-    maxEnd: number = Infinity,
-): WordTimestamp[] {
-    return chunks
-        .map((c) => ({
-            text: c.text.trim(),
-            start: (c.timestamp[0] ?? 0) + chunkOffsetSeconds,
-            end: (c.timestamp[1] ?? 0) + chunkOffsetSeconds,
-        }))
-        .filter((w) => w.text.length > 0 && w.end >= w.start)
-        .map((w) => clampSpan(w, maxEnd));
-}
 
 /**
  * Clamp a timed span so it never runs past `maxEnd` (the real audio end),
@@ -90,29 +69,22 @@ export function groupWordsIntoSegments(words: WordTimestamp[]): TranscriptSegmen
     return segments;
 }
 
-/**
- * Turn one pipeline result into file-relative segments for a PCM chunk.
- * Every branch (word timestamps, segment timestamps, text-only models such as
- * Parakeet CTC) is clamped to the chunk's real audio end, because the final
- * chunk is zero-padded to a 30 s window.
- */
+/** Clamps to the chunk's real audio end: the final chunk is zero-padded to 30 s. */
 export function buildSegments(
-    output: { text: string; chunks?: TimestampChunk[] },
+    result: EngineResult,
     chunk: Pick<PCMChunk, 'timestamp' | 'samples' | 'duration'>,
-    config: Pick<ModelConfig, 'supportsWordTimestamps'>,
 ): TranscriptSegment[] {
-    const chunkEnd = chunk.timestamp + (chunk.duration ?? chunk.samples.length / 16_000);
+    const offset = chunk.timestamp;
+    const chunkEnd = offset + (chunk.duration ?? chunk.samples.length / 16_000);
+    const shift = (t: TimedText) => ({ text: t.text.trim(), start: t.start + offset, end: t.end + offset });
     let segments: TranscriptSegment[];
-    if (config.supportsWordTimestamps && output.chunks?.length) {
-        segments = groupWordsIntoSegments(chunksToWords(output.chunks, chunk.timestamp, chunkEnd));
-    } else if (output.chunks?.length) {
-        segments = output.chunks.map((c) => ({
-            text: c.text.trim(),
-            start: (c.timestamp[0] ?? 0) + chunk.timestamp,
-            end: (c.timestamp[1] ?? 0) + chunk.timestamp,
-        })).filter((s) => s.text.length > 0);
-    } else if (output.text.trim()) {
-        segments = [{ text: output.text.trim(), start: chunk.timestamp, end: chunkEnd }];
+    if (result.words?.length) {
+        const words = result.words.map(shift).filter((w) => w.text.length > 0 && w.end >= w.start);
+        segments = groupWordsIntoSegments(words.map((w) => clampSpan(w, chunkEnd)));
+    } else if (result.segments?.length) {
+        segments = result.segments.map(shift).filter((s) => s.text.length > 0);
+    } else if (result.text.trim()) {
+        segments = [{ text: result.text.trim(), start: offset, end: chunkEnd }];
     } else {
         segments = [];
     }
