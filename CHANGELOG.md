@@ -9,27 +9,40 @@ Dates are npm publish dates in **IST (UTC+5:30)**, taken from the npm registry. 
 
 ## [Unreleased]
 
+## [2.0.0] - 2026-10-18
+
+### Breaking changes
+- **`whisper-large-v3` removed** from `ASRModel` (#29, 5640636). Its fp32 encoder is a single 2.55 GB `encoder_model.onnx_data` file that browsers can't allocate in one ArrayBuffer (`RangeError: Array buffer allocation failed`), so it never loaded. Code passing `model: 'whisper-large-v3'` no longer type-checks, and plain JS callers get a load error. Use `whisper-large-v3-turbo`, ideally with `quantization: 'q4'` or `'fp16'`. The internal `ModelConfig.externalData` override it used (#27) is gone too.
+- **`ModelConfig` has new required fields** (#32 6f4528f, #36 via #37 6e3d989):
+  - `engine` (`EngineId`), `capabilities` (`ModelCapabilities`) and `engineConfig` are now required.
+  - This only breaks code that **constructs** `ModelConfig` objects itself. Reading `MODELS` is unaffected.
+- **Deprecated, still present:** `ModelConfig.hfId`, `hybridDtype`, `supportsTimestamps`, `supportsWordTimestamps` and `supportsLanguage`. Use `capabilities.*` and `engineConfig` instead. They will be removed in a future major release. Cache ids are unchanged, so existing OPFS caches stay valid.
+
 ### Added
-- `THIRD_PARTY_NOTICES.md` (shipped in the npm package): licenses, copyright lines, and full texts for bundled code, CDN-loaded runtimes, and every model's weights. `THIRD_PARTY_LICENSES` now points to it. Visible model credits (with the CC BY 4.0 attribution and a note of changes) on the demo, examples, docs and home pages, plus a README Credits section.
-- `parakeet-tdt-0.6b-v3` (NVIDIA Parakeet TDT 0.6B v3, CC-BY-4.0): **WebGPU only**. Multilingual (auto-detected), with punctuation and word timestamps. Runs on a new `parakeet` engine that loads [parakeet.js](https://github.com/ysdede/parakeet.js) from a pinned CDN URL on demand, so it is never bundled.
+- **`parakeet-tdt-0.6b-v3`** (NVIDIA Parakeet TDT 0.6B v3, CC-BY-4.0), **WebGPU only** (#33, f5d5169).
+  - 25 European languages (auto-detected), punctuation and word timestamps.
+  - Runs on a new `parakeet` engine that loads [parakeet.js](https://github.com/ysdede/parakeet.js) from a pinned CDN URL on demand, so it is never bundled.
+  - Defaults to the fp16 encoder, which needs the `shader-f16` adapter feature. Use `quantization: 'q8'` on GPUs without it.
+- **Pluggable ASR engine layer** (#32, #36).
+  - Each model names an engine, and engines load lazily via dynamic `import()`, WebGPU first with WASM fallback.
+  - Engines get an engine-neutral contract: words/segments output, per-file progress, an AbortSignal, and WebGPU adapter features passed in.
+  - See CONTRIBUTING.md for adding an engine.
+- New exported types `ModelCapabilities` and `EngineId`.
+- An unsupported `quantization` for a model's engine (e.g. `q4` on Parakeet TDT) is rejected with a clear `ModelLoadError` before anything downloads.
+- A console warning when `language` is passed to a model that ignores it.
+- **Generated model lists** (#35 via #37): the demo/example pickers, the docs/home model tables and the credits blocks are generated from `MODELS` plus `site/model-meta.ts` at site-build time. A drift test keeps the README table in sync.
+- **`THIRD_PARTY_NOTICES.md`**, shipped in the npm package: licenses, copyright lines and full texts for bundled code, CDN-loaded runtimes and every model's weights. Visible model credits with the CC BY 4.0 attribution appear on the demo, examples, docs and home pages, and the README has a Credits section.
+- **CI:** a GitHub Actions workflow runs typecheck, test, build, a bundle-size budget (`bun run size`) and build:site on PRs and on pushes to main. There are also worker contract tests with fake engines and engine import-isolation tests.
 
 ### Fixed
-- `cancel()` followed by another `transcribe()` on the same `BrowserWhisper` instance no longer receives leftover segments (and an early `done`) from the cancelled run. Each run now has an id, and cancelling drops the worker's queued chunks and discards in-flight results ([#34](https://github.com/tanpreetjolly/browser-whisper/issues/34)).
+- **`cancel()` on a reused instance.** A `transcribe()` started after `cancel()` on the same `BrowserWhisper` instance no longer receives leftover segments, or an early `done`, from the cancelled run ([#34](https://github.com/tanpreetjolly/browser-whisper/issues/34)). Runs now carry ids, and cancelling drops the worker's queued chunks and discards in-flight results.
+- **Load stuck at 99%.** Model-load failures that escaped transformers.js' internal promises (e.g. `Array buffer allocation failed`) no longer leave loading stuck at 99%. They now reject with a `ModelLoadError` (#28, 034799e).
+- **OPFS cache writes are best-effort.** A failed write logs a warning, removes the partial file, and loading continues from the network (#28).
 
 ### Changed
-- `ModelConfig` gains `capabilities` (`timestamps`, `wordTimestamps`, `language`) and an engine-owned `engineConfig`. `hfId`, `hybridDtype` and the `supports*` flags are still present but deprecated. `ModelCapabilities` and `EngineId` are now exported types.
-- An unsupported `quantization` for a model's engine (e.g. `q4` on `parakeet-tdt-0.6b-v3`) is rejected up front with a clear `ModelLoadError`, before anything downloads.
-- A console warning is logged when `language` is passed to a model that ignores it.
-- Internal: engine-neutral engine interface (neutral words/segments output, per-file progress, AbortSignal, WebGPU adapter features passed in); `whisper-worker.ts` renamed to `asr-worker.ts`, with its logic in a testable `asr-core.ts`; CI workflow, bundle-size budget (`bun run size`), worker contract and import-isolation tests.
-- Internal: ASR runtimes are now pluggable engines (`src/workers/engines/`). The Transformers.js logic moved into a lazily `import()`ed `transformers` engine; each `MODELS` entry names its `engine` (new `ModelConfig.engine` field). No runtime behaviour or public API change.
-
-### Removed
-- **Breaking (TypeScript):** `whisper-large-v3` is no longer an `ASRModel`. Its fp32 encoder is a single 2.55 GB `encoder_model.onnx_data` file, which browsers can't allocate in one ArrayBuffer (`RangeError: Array buffer allocation failed`), so the model never loaded. Code passing `model: 'whisper-large-v3'` now fails to type-check; plain JS callers get a load error. Use `whisper-large-v3-turbo` instead, ideally with `quantization: 'q4'` or `'fp16'` (its default hybrid mode also loads a 2.55 GB fp32 encoder).
-- The internal `ModelConfig.externalData` override, which only `whisper-large-v3` used. Repos that declare external data in their own `transformers.js_config` are unaffected.
-
-### Fixed
-- Model-load failures that escaped transformers.js' internal promises (e.g. `RangeError: Array buffer allocation failed` while fetching multi-GB ONNX external data) left loading stuck at 99% forever. The worker now traps unhandled rejections/errors during load and `waitForReady` rejects with a `ModelLoadError`.
-- OPFS caching is now best-effort: a failed cache write logs a warning, removes the partial file, and loading continues from the network response.
+- The worker file is renamed from `whisper-worker.ts` to `asr-worker.ts`, with its logic in a testable `asr-core.ts`. Worker error messages say "ASR worker".
+- More tests for model families and configuration invariants (#24, #30).
+- New trademark policy for the browser-whisper name (#26).
 
 ## [1.2.0] - 2026-10-11
 
@@ -160,7 +173,8 @@ Dates are npm publish dates in **IST (UTC+5:30)**, taken from the npm registry. 
 - Progress stages for loading, decoding, and transcribing (8a2bb8c).
 - Type declarations emitted in the build (6ae913b).
 
-[Unreleased]: https://github.com/tanpreetjolly/browser-whisper/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/tanpreetjolly/browser-whisper/compare/v2.0.0...HEAD
+[2.0.0]: https://github.com/tanpreetjolly/browser-whisper/releases/tag/v2.0.0
 [1.2.0]: https://github.com/tanpreetjolly/browser-whisper/releases/tag/v1.2.0
 [1.1.1]: https://github.com/tanpreetjolly/browser-whisper/releases/tag/v1.1.1
 [1.1.0]: https://www.npmjs.com/package/browser-whisper/v/1.1.0
