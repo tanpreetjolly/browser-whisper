@@ -1,12 +1,22 @@
-/** True when navigator.gpu exists and returns a GPU adapter. */
-export async function hasWebGPUAdapter(
-    gpu: { requestAdapter(options?: unknown): Promise<unknown> } | undefined =
-        (globalThis.navigator as unknown as { gpu?: { requestAdapter(options?: unknown): Promise<unknown> } } | undefined)?.gpu,
-): Promise<boolean> {
-    if (!gpu) return false;
+type GPULike = { requestAdapter(options?: unknown): Promise<unknown> };
+
+const defaultGpu = (): GPULike | undefined =>
+    (globalThis.navigator as unknown as { gpu?: GPULike } | undefined)?.gpu;
+
+export async function requestWebGPUAdapter(
+    gpu: GPULike | undefined = defaultGpu(),
+): Promise<{ features: ReadonlySet<string> } | null> {
+    if (!gpu) return null;
     try {
-        return (await gpu.requestAdapter({ powerPreference: 'high-performance' })) != null;
+        const adapter = (await gpu.requestAdapter({ powerPreference: 'high-performance' })) as
+            { features?: Iterable<string> } | null | undefined;
+        if (adapter == null) return null;
+        return { features: new Set(adapter.features ?? []) };
     } catch {
-        return false;
+        return null;
     }
+}
+
+export async function hasWebGPUAdapter(gpu: GPULike | undefined = defaultGpu()): Promise<boolean> {
+    return (await requestWebGPUAdapter(gpu)) != null;
 }
