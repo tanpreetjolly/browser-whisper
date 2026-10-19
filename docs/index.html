@@ -501,12 +501,19 @@ console.log(segments.map(s => s.text).join(' '))</code></pre>
 
         <h3><code>whisper.downloadModel(model)</code></h3>
         <p>
-          Download and cache a model without transcribing. Supports
-          <code>onProgress</code> and <code>AbortSignal</code>.
+          Download and cache a model without transcribing. Accepts a model name or options
+          with <code>onProgress</code> and an <code>AbortSignal</code>.
         </p>
+        <pre><code>await whisper.downloadModel({
+  model: 'whisper-small',
+  onProgress: ({ progress }) => updateBar(progress),
+  signal: controller.signal,
+})</code></pre>
 
         <h3><code>BrowserWhisper.clearCache()</code> / <code>deleteModel(model)</code></h3>
         <p>Remove cached model weights from the browser.</p>
+        <pre><code>await BrowserWhisper.clearCache()            // every model
+await BrowserWhisper.deleteModel('whisper-tiny') // one model</code></pre>
 
         <h3><code>stream.cancel()</code> and <code>whisper.dispose()</code></h3>
         <p>
