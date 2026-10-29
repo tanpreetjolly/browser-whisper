@@ -4,7 +4,7 @@
 
 **Speech-to-text in the browser with WebGPU: Whisper, Moonshine and Parakeet.** Fully local: no backend, no API keys, audio never leaves the device.
 
-[Live demo](https://whisper.tanpreet.xyz/demo/) · [Documentation](https://whisper.tanpreet.xyz/docs/) · [Examples](https://whisper.tanpreet.xyz/examples/) · [GitHub](https://github.com/tanpreetjolly/browser-whisper)
+[Live demo](https://whisper.tanpreet.xyz/demo/?utm_source=github&utm_medium=readme) · [Documentation](https://whisper.tanpreet.xyz/docs/?utm_source=github&utm_medium=readme) · [Examples](https://whisper.tanpreet.xyz/examples/?utm_source=github&utm_medium=readme) · [GitHub](https://github.com/tanpreetjolly/browser-whisper)
 
 [![npm version](https://img.shields.io/npm/v/browser-whisper.svg?style=flat-square)](https://www.npmjs.com/package/browser-whisper)
 [![license](https://img.shields.io/npm/l/browser-whisper.svg?style=flat-square)](https://github.com/tanpreetjolly/browser-whisper/blob/main/LICENSE)
@@ -55,7 +55,7 @@ Cross-Origin-Embedder-Policy: require-corp
 Cross-Origin-Opener-Policy: same-origin
 ```
 
-In Vite, set them on `server` and `preview`. In Next.js, set them in `next.config` and import the library on the client only. See the [setup guide](https://whisper.tanpreet.xyz/docs/#headers).
+In Vite, set them on `server` and `preview`. In Next.js, set them in `next.config` and import the library on the client only. See the [setup guide](https://whisper.tanpreet.xyz/docs/?utm_source=github&utm_medium=readme#headers).
 
 ## Common patterns
 
@@ -71,7 +71,7 @@ cancelButton.onclick = () => stream.cancel()
 
 `cancel()` ends the stream. You can reuse the instance straight away: the next transcription starts once the in-flight chunk finishes, and the loaded model is reused. Call `whisper.dispose()` when you're done with the instance to terminate its worker.
 
-To pre-download a model, or clear cached weights, see the [API docs](https://whisper.tanpreet.xyz/docs/#api) (`downloadModel`, `clearCache`, `deleteModel`).
+To pre-download a model, or clear cached weights, see the [API docs](https://whisper.tanpreet.xyz/docs/?utm_source=github&utm_medium=readme#api) (`downloadModel`, `clearCache`, `deleteModel`).
 
 ## Models
 
@@ -92,7 +92,7 @@ The default is `whisper-tiny`. Weights come from Hugging Face and are cached in 
 
 **Parakeet TDT v3** requires WebGPU. Its default fp16 encoder needs the `shader-f16` adapter feature; on GPUs without it, pass `quantization: 'q8'`. The language is auto-detected, so `language` is ignored. Its runtime ([parakeet.js](https://github.com/ysdede/parakeet.js)) is fetched only when you pick this model.
 
-Sizes, quantization and per-model details are in the [docs](https://whisper.tanpreet.xyz/docs/#models).
+Sizes, quantization and per-model details are in the [docs](https://whisper.tanpreet.xyz/docs/?utm_source=github&utm_medium=readme#models).
 
 ## Browser support
 

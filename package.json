@@ -46,7 +46,7 @@
     "type": "git",
     "url": "git+https://github.com/tanpreetjolly/browser-whisper.git"
   },
-  "homepage": "https://whisper.tanpreet.xyz",
+  "homepage": "https://whisper.tanpreet.xyz/?utm_source=npm&utm_medium=package",
   "bugs": {
     "url": "https://github.com/tanpreetjolly/browser-whisper/issues"
   },
